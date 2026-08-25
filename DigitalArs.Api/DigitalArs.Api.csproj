@@ -15,4 +15,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalArs.Application\DigitalArs.Application.csproj" />
+    <ProjectReference Include="..\DigitalArs.Infrastructure\DigitalArs.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

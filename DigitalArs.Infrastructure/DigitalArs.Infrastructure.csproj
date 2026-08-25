@@ -15,4 +15,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalArs.Application\DigitalArs.Application.csproj" />
+  </ItemGroup>
+
 </Project>
