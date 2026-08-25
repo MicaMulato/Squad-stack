@@ -1,13 +1,14 @@
 <Solution>
   <Project Path="Application/Application.csproj">
-    <BuildDependency Project="DigitalArs/DigitalArs.csproj" />
+    <BuildDependency Project="Domain/Domain.csproj" />
   </Project>
-  <Project Path="DigitalArs/DigitalArs.csproj" />
-  <Project Path="Domain/Domain.csproj">
+  <Project Path="DigitalArs/DigitalArs.csproj">
     <BuildDependency Project="Application/Application.csproj" />
     <BuildDependency Project="Infraestructure/Infraestructure.csproj" />
   </Project>
+  <Project Path="Domain/Domain.csproj" />
   <Project Path="Infraestructure/Infraestructure.csproj">
-    <BuildDependency Project="DigitalArs/DigitalArs.csproj" />
+    <BuildDependency Project="Application/Application.csproj" />
+    <BuildDependency Project="Domain/Domain.csproj" />
   </Project>
 </Solution>
