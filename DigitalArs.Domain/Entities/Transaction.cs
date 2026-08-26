@@ -1,6 +1,6 @@
-namespace Domain.Entities;
+namespace DigitalArs.Domain.Entities;
 
-using Domain.Enums;
+using DigitalArs.Domain.Enums;
 
 public class Transaction : BaseEntity
 {
