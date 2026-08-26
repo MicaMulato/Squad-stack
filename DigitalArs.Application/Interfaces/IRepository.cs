@@ -1,8 +1,8 @@
 ﻿
-using Domain.Entities;
+using DigitalArs.Domain.Entities;
 using System.Linq.Expressions;
 
-namespace Application.Interfaces
+namespace DigitalArs.Application.Interfaces
 {
     public interface IRepository<T> where T: BaseEntity
     {

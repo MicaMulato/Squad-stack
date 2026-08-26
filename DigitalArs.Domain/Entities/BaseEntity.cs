@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities
+﻿namespace DigitalArs.Domain.Entities
 {
 
     /*
