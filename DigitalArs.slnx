@@ -1,14 +1,6 @@
 <Solution>
-  <Project Path="Application/Application.csproj">
-    <BuildDependency Project="Domain/Domain.csproj" />
-  </Project>
-  <Project Path="DigitalArs/DigitalArs.csproj">
-    <BuildDependency Project="Application/Application.csproj" />
-    <BuildDependency Project="Infraestructure/Infraestructure.csproj" />
-  </Project>
-  <Project Path="Domain/Domain.csproj" />
-  <Project Path="Infraestructure/Infraestructure.csproj">
-    <BuildDependency Project="Application/Application.csproj" />
-    <BuildDependency Project="Domain/Domain.csproj" />
-  </Project>
+  <Project Path="DigitalArs.Api/DigitalArs.Api.csproj" />
+  <Project Path="DigitalArs.Application/DigitalArs.Application.csproj" />
+  <Project Path="DigitalArs.Domain/DigitalArs.Domain.csproj" />
+  <Project Path="DigitalArs.Infrastructure/DigitalArs.Infrastructure.csproj" />
 </Solution>
