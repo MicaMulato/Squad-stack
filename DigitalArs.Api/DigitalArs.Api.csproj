@@ -20,9 +20,4 @@
     <ProjectReference Include="..\DigitalArs.Infrastructure\DigitalArs.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-	  <ProjectReference Include="..\DigitalArs.Application\DigitalArs.Application.csproj" />
-	  <ProjectReference Include="..\DigitalArs.Infrastructure\DigitalArs.Infrastructure.csproj" />
-  </ItemGroup>
-
 </Project>

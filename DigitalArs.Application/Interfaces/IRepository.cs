@@ -1,5 +1,4 @@
-﻿
-using DigitalArs.Domain.Entities;
+﻿using DigitalArs.Domain.Entities;
 using System.Linq.Expressions;
 
 namespace DigitalArs.Application.Interfaces
