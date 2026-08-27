@@ -20,25 +20,24 @@ namespace DigitalArs
             builder.Services.AddOpenApi();
 
             // ============================================================
-            // NUEVO: DbContext
+            // DbContext
             // ============================================================
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-            // NUEVO: Identity — habilita UserManager<User> / RoleManager<Role>
+            // Identity — habilita UserManager<User> / RoleManager<Role>
             builder.Services.AddIdentity<User, Role>(options =>
             {
-                // Config mínima para desarrollo, ajustar cuando la situación lo requiera
+                // Config minima para desarrollo, ajustar cuando la situacion lo requiera
                 options.Password.RequireNonAlphanumeric = false;
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
             // ============================================================
-            // NUEVO: Repository genérico + Unit of Work
+            // Repository generico + Unit of Work
             // (solo para entidades que heredan BaseEntity: Account, Transaction, etc.
-            //  User y Role se manejan con UserManager/RoleManager, no por acá)
+            //  User y Role se manejan con UserManager/RoleManager, no por aca)
             // ============================================================
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -53,9 +52,7 @@ namespace DigitalArs
 
             app.UseHttpsRedirection();
 
-            // NUEVO: UseAuthentication SIEMPRE antes de UseAuthorization.
-            // Sin esto, Identity/JWT nunca autentica al usuario (y no tira
-            // error, simplemente falla silenciosamente en cada request).
+            // UseAuthentication SIEMPRE antes de UseAuthorization.
             app.UseAuthentication();
             app.UseAuthorization();
 

@@ -29,5 +29,31 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .OnDelete(DeleteBehavior.Restrict);
 
         // La relacion Account 1:N Transaction se configura desde TransactionConfiguration
+
+        // === Data Seeding ===
+        // Saldo inicial basado en sueldo minimo argentino (~$260.000 ARS aprox.)
+        builder.HasData(
+            new Account
+            {
+                Id = 1,
+                UserId = 1, // Admin
+                Money = 500000.00m,
+                IsBlocked = false
+            },
+            new Account
+            {
+                Id = 2,
+                UserId = 2, // Roberto Carlos
+                Money = 260000.00m,
+                IsBlocked = false
+            },
+            new Account
+            {
+                Id = 3,
+                UserId = 3, // Mohammed Khan
+                Money = 185000.50m,
+                IsBlocked = false
+            }
+        );
     }
 }

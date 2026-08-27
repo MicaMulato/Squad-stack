@@ -15,5 +15,23 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .HasMaxLength(200);
 
         // La relacion Role 1:N User se configura desde UserConfiguration
+
+        // === Data Seeding ===
+        builder.HasData(
+            new Role
+            {
+                Id = 1,
+                Name = "Admin",
+                NormalizedName = "ADMIN",
+                Description = "Administrador con permisos elevados para gestionar usuarios"
+            },
+            new Role
+            {
+                Id = 2,
+                Name = "User",
+                NormalizedName = "USER",
+                Description = "Usuario estandar de la billetera virtual"
+            }
+        );
     }
 }
