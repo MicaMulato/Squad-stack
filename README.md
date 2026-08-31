@@ -90,7 +90,7 @@ La base de datos se precarga con los siguientes usuarios de prueba:
 
 ## Patrones implementados
 
-- **Repository Pattern**: Acceso a datos generico y desacoplado (`IRepository<T>`)
+- **Repository Pattern**: Acceso a datos generico y desacoplado (`IBaseRepository<T>`)
 - **Unit of Work**: Gestion transaccional coordinada (`IUnitOfWork`)
 - **Code First**: Modelado de BD desde clases C#
 - **Fluent API**: Configuracion de relaciones, indices y restricciones

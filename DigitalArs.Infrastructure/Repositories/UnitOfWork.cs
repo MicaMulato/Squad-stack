@@ -19,16 +19,16 @@ namespace DigitalArs.Infrastructure.Repositories
         {
             _context = context;
         }
-        public IRepository<T> Repository<T>() where T : BaseEntity
+        public IBaseRepository<T> Repository<T>() where T : BaseEntity
         {
             var type = typeof(T);
 
             if (!_repositories.ContainsKey(type))
             {
-                var repositoryInstance = new Repository<T>(_context);
+                var repositoryInstance = new BaseRepository<T>(_context);
                 _repositories[type] = repositoryInstance;
             }
-            return (IRepository<T>)_repositories[type];
+            return (IBaseRepository<T>)_repositories[type];
         }
         public async Task<int> SaveChangesAsync()
         {
