@@ -101,7 +101,8 @@ La base de datos se precarga con los siguientes usuarios de prueba:
 | ---------- | --------------------------------------------------------------------------------- |
 | Micaela    | HU-01 (Estructura), HU-04 (Migracion)                                             |
 | Maximo     | HU-02 (Entidades dominio)                                                         |
-| Emmanuel   | HU-03 (DbContext), HU-05 (Seeding), HU-06 (Repository/UoW), HU-07 (Documentacion) |
+| Emmanuel   | HU-06 (Repository/UoW), HU-07 (Documentacion)                                     |
+| Andres     | HU-03 (DbContext), HU-05 (Seeding)                                                |
 
 ## Scripts utiles
 
