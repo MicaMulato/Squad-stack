@@ -7,18 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DigitalArs.Infrastructure.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : BaseEntity 
+    public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity 
     {
         protected readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;
 
-        public Repository(ApplicationDbContext context)
+        public BaseRepository(ApplicationDbContext context)
         {
             _context = context;
             _dbSet = _context.Set<T>();
         }
 
-        public async Task<T?> GetAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
