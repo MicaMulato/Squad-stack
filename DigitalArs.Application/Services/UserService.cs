@@ -29,6 +29,10 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
+    // =========================================================================
+    // HU-12: CRUD Administrativo de Usuarios
+    // =========================================================================
+
     public async Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserFilterQuery query, CancellationToken cancellationToken = default)
     {
         IQueryable<User> queryable;
@@ -243,5 +247,69 @@ public class UserService : IUserService
         await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
         var result = await _userManager.UpdateAsync(user);
         return result.Succeeded;
+    }
+
+    // =========================================================================
+    // HU-13: Ver y actualizar mis datos propios (/me)
+    // =========================================================================
+
+    public async Task<UserResponse?> GetMyProfileAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null || user.IsDeleted)
+        {
+            return null;
+        }
+
+        return _mapper.Map<UserResponse>(user);
+    }
+
+    public async Task<UserResponse?> UpdateMyProfileAsync(int userId, UpdateMyProfileRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null || user.IsDeleted)
+        {
+            return null;
+        }
+
+        // Si solicita cambio de contraseña, validar contraseña actual y aplicar cambio
+        if (!string.IsNullOrEmpty(request.NewPassword))
+        {
+            if (string.IsNullOrEmpty(request.CurrentPassword))
+            {
+                throw new InvalidOperationException("Debe indicar la contraseña actual para cambiarla.");
+            }
+
+            var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+            if (!isCurrentPasswordValid)
+            {
+                throw new InvalidOperationException("La contraseña actual ingresada es incorrecta.");
+            }
+
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                var errors = string.Join("; ", changePasswordResult.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Error al cambiar la contraseña: {errors}");
+            }
+        }
+
+        user.FirstName = request.FirstName.Trim();
+        user.LastName = request.LastName.Trim();
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Error al actualizar los datos: {errors}");
+        }
+
+        return _mapper.Map<UserResponse>(user);
     }
 }

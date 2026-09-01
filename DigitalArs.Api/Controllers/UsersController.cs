@@ -1,17 +1,15 @@
+using System.Security.Claims;
 using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.DTOs.Users;
 using DigitalArs.Application.Exceptions;
 using DigitalArs.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalArs.Api.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
-// Espacio para agregar filtros HU-11
-// [Authorize(Roles = "Admin")]
-
+[Route("api/[controller]")]
+// Nota: [Authorize] o [Authorize(Roles = "Admin")] sera integrado en HU-10/HU-11 por el compañero asignado.
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -21,9 +19,94 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-// El manejo de excepciones se encuentra repetido hasta la construccion del middleware
-// de GlobalExceptionHandler para un manejo mas limpio de errores. Una vez implementado
+    // =========================================================================
+    // HU-13: Ver y actualizar mis datos (/me)
+    // =========================================================================
 
+    /// <summary>
+    /// Obtiene los datos del usuario autenticado a partir de su token (HU-13).
+    /// </summary>
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResponse>> GetMyProfile(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status401Unauthorized,
+                Message = "No se pudo identificar al usuario autenticado.",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        var user = await _userService.GetMyProfileAsync(userId.Value, cancellationToken);
+        if (user == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status404NotFound,
+                Message = "Usuario no encontrado.",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        return Ok(user);
+    }
+
+    /// <summary>
+    /// Actualiza los datos del usuario autenticado (nombre, apellido y opcionalmente contraseña) (HU-13).
+    /// </summary>
+    [HttpPut("me")]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResponse>> UpdateMyProfile([FromBody] UpdateMyProfileRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status401Unauthorized,
+                Message = "No se pudo identificar al usuario autenticado.",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        try
+        {
+            var updatedUser = await _userService.UpdateMyProfileAsync(userId.Value, request, cancellationToken);
+            if (updatedUser == null)
+            {
+                return NotFound(new ErrorResponse
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Message = "Usuario no encontrado.",
+                    TraceId = HttpContext.TraceIdentifier
+                });
+            }
+
+            return Ok(updatedUser);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = ex.Message,
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+    }
+
+    // =========================================================================
+    // HU-12: CRUD Administrativo de Usuarios
+    // =========================================================================
 
     /// <summary>
     /// Obtiene el listado paginado de usuarios con filtros por nombre, email, rol y estado activo (HU-12).
@@ -149,5 +232,31 @@ public class UsersController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+
+    private int? GetCurrentUserId()
+    {
+        // 1. Lectura de claims del token (cuando JWT este activo en HU-10/11)
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+            ?? User.FindFirstValue("sub") 
+            ?? User.FindFirstValue("id");
+
+        if (int.TryParse(claimValue, out var id))
+        {
+            return id;
+        }
+
+        // 2. Fallback por header opcional para pruebas de integracion/desarrollo
+        if (Request.Headers.TryGetValue("X-User-Id", out var headerValue) 
+            && int.TryParse(headerValue, out var headerId))
+        {
+            return headerId;
+        }
+
+        return null;
     }
 }
