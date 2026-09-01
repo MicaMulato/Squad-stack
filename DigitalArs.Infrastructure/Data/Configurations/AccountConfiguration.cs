@@ -31,6 +31,12 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasForeignKey<Account>(a => a.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Filtro global coincidente con el de User: una cuenta se oculta cuando su
+        // usuario esta dado de baja logica. Necesario porque User (extremo requerido
+        // de la relacion 1:1) tiene HasQueryFilter(!IsDeleted); sin este filtro
+        // coincidente EF advierte por posibles resultados inconsistentes.
+        builder.HasQueryFilter(a => !a.User!.IsDeleted);
+
         // La relacion Account 1:N Transaction se configura desde TransactionConfiguration
 
         // === Data Seeding ===
