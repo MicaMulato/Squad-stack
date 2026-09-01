@@ -23,8 +23,7 @@ namespace DigitalArs
             // DbContext
             // ============================================================
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-                    .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Identity — habilita UserManager<User> / RoleManager<Role>
             builder.Services.AddIdentity<User, Role>(options =>

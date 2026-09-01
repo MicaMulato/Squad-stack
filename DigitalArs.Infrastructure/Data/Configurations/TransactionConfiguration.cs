@@ -27,6 +27,12 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         // Indice en Date para consultas por rango de fechas 
         builder.HasIndex(t => t.Date);
 
+        // Filtro global coincidente en cascada con User/Account: una transaccion se
+        // oculta cuando la cuenta origen pertenece a un usuario dado de baja logica.
+        // Necesario porque Account (extremo requerido de esta relacion) tiene filtro
+        // global; EF exige filtros coincidentes en ambos extremos requeridos.
+        builder.HasQueryFilter(t => !t.Account!.User!.IsDeleted);
+
         // Relacion Account 1:N Transaction (cuenta origen)
         builder.HasOne(t => t.Account)
             .WithMany(a => a.Transactions)

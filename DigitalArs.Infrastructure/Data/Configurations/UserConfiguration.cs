@@ -30,6 +30,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique()
             .HasFilter("[Email] IS NOT NULL");
 
+        // Indice en IsDeleted: soporta el filtro global de soft-delete (WHERE IsDeleted = 0)
+        builder.HasIndex(u => u.IsDeleted);
+
+        // Filtro global de soft-delete: las consultas de User excluyen automaticamente
+        // los usuarios dados de baja logica. Para incluirlos usar .IgnoreQueryFilters().
+        builder.HasQueryFilter(u => !u.IsDeleted);
+
         // Relacion Role 1:N User (FK directa para simplificar consultas)
         builder.HasOne(u => u.Role)
             .WithMany(r => r.Users)
