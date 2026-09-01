@@ -39,7 +39,7 @@ namespace DigitalArs
             // (solo para entidades que heredan BaseEntity: Account, Transaction, etc.
             //  User y Role se manejan con UserManager/RoleManager, no por aca)
             // ============================================================
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             var app = builder.Build();
