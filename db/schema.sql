@@ -392,3 +392,54 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260901045432_AddAccountCreatedAt'
+)
+BEGIN
+    ALTER TABLE [Accounts] ADD [CreatedAt] datetime2 NOT NULL DEFAULT (GETUTCDATE());
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260901045432_AddAccountCreatedAt'
+)
+BEGIN
+    EXEC(N'UPDATE [Accounts] SET [CreatedAt] = ''2025-01-01T00:00:00.0000000Z''
+    WHERE [Id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260901045432_AddAccountCreatedAt'
+)
+BEGIN
+    EXEC(N'UPDATE [Accounts] SET [CreatedAt] = ''2025-01-01T00:00:00.0000000Z''
+    WHERE [Id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260901045432_AddAccountCreatedAt'
+)
+BEGIN
+    EXEC(N'UPDATE [Accounts] SET [CreatedAt] = ''2025-01-01T00:00:00.0000000Z''
+    WHERE [Id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260901045432_AddAccountCreatedAt'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260901045432_AddAccountCreatedAt', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
