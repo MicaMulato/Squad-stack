@@ -18,6 +18,9 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(a => a.IsBlocked)
             .HasDefaultValue(false);
 
+        builder.Property(a => a.CreatedAt)
+            .HasDefaultValueSql("GETUTCDATE()");
+
         // Indice unico en UserId (refuerza relacion 1:1 con User)
         builder.HasIndex(a => a.UserId)
             .IsUnique();
@@ -38,21 +41,24 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 Id = 1,
                 UserId = 1, // Admin
                 Money = 500000.00m,
-                IsBlocked = false
+                IsBlocked = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Account
             {
                 Id = 2,
                 UserId = 2, // Roberto Carlos
                 Money = 260000.00m,
-                IsBlocked = false
+                IsBlocked = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Account
             {
                 Id = 3,
                 UserId = 3, // Mohammed Khan
                 Money = 185000.50m,
-                IsBlocked = false
+                IsBlocked = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }

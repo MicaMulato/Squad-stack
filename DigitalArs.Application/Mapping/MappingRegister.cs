@@ -32,7 +32,7 @@ public class MappingRegister : IRegister
             .Map(dest => dest.Balance, src => src.Account != null ? src.Account.Money : 0m);
 
         // Account -> AccountResponse: Money se expone como Balance.
-        // CreatedAt queda pendiente (la entidad Account aun no tiene esa propiedad).
+        // CreatedAt mapea 1:1 (la entidad Account ahora tiene esa propiedad).
         config.NewConfig<Account, AccountResponse>()
             .Map(dest => dest.Balance, src => src.Money);
     }

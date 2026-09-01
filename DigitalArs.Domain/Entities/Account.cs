@@ -4,6 +4,7 @@ public class Account : BaseEntity
 {
     public decimal Money { get; set; }
     public bool IsBlocked { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Foreign Key y propiedad de navegación bidireccional con User
     public int UserId { get; set; }
