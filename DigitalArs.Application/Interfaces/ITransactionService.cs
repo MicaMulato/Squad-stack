@@ -15,6 +15,13 @@ public interface ITransactionService
     /// <param name="sourceUserId">ID del usuario que origina la transferencia.</param>
     /// <param name="destinationAccountId">ID de la cuenta que recibirá los fondos.</param>
     /// <param name="amount">Monto a transferir. Debe ser mayor a 0.</param>
-    /// <returns>DTO con los IDs de ambas transacciones, monto, nuevo saldo y fecha.</returns>
     Task<TransferResponseDto> TransferAsync(int sourceUserId, int destinationAccountId, decimal amount);
+
+    /// <summary>
+    /// Devuelve el historial de transacciones de la cuenta del usuario, paginado y filtrado.
+    /// Usa proyección para evitar cargar entidades innecesarias (sin N+1).
+    /// </summary>
+    /// <param name="userId">ID del usuario dueño de la cuenta.</param>
+    /// <param name="query">Parámetros de paginación y filtros opcionales.</param>
+    Task<PagedResultDto<TransactionItemDto>> GetHistoryAsync(int userId, TransactionQueryDto query);
 }

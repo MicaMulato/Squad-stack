@@ -34,49 +34,79 @@ public class TransactionsController : ControllerBase
     /// - No se puede transferir a la propia cuenta.
     /// - El saldo disponible debe ser mayor o igual al monto.
     /// </remarks>
-    /// <param name="dto">DTO con la cuenta destino y el monto a transferir.</param>
-    /// <returns>IDs de ambas transacciones, monto, nuevo saldo y fecha.</returns>
-    /// <response code="200">Transferencia realizada correctamente.</response>
-    /// <response code="400">Monto inválido, saldo insuficiente, cuenta bloqueada o autotransferencia.</response>
-    /// <response code="404">Cuenta origen o destino no encontrada.</response>
     [HttpPost("transfer")]
     [ProducesResponseType(typeof(TransferResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Transfer([FromBody] TransferRequestDto dto)
     {
-        // Validación de formato: amount > 0
         if (dto.Amount <= 0)
             return BadRequest(new { error = "El monto debe ser mayor a 0." });
 
         // TODO: reemplazar por claim del JWT cuando se implemente [Authorize]
-        // var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        // int userId = int.Parse(userIdClaim!);
-        int userId = 1; // temporario para desarrollo (ID 1 = Admin del seed)
+        int userId = 1;
 
         try
         {
             var result = await _transactionService.TransferAsync(
-                userId,
-                dto.DestinationAccountId,
-                dto.Amount);
-
+                userId, dto.DestinationAccountId, dto.Amount);
             return Ok(result);
         }
         catch (ArgumentException ex)
         {
-            // Autotransferencia
             return BadRequest(new { error = ex.Message });
         }
         catch (KeyNotFoundException ex)
         {
-            // Cuenta origen o destino no existe
             return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            // Saldo insuficiente o cuenta destino bloqueada
             return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Devuelve el historial de movimientos del usuario autenticado con filtros y paginación.
+    /// </summary>
+    /// <remarks>
+    /// GET /api/transactions/me
+    ///
+    /// Ejemplos de uso:
+    ///
+    ///     GET /api/transactions/me
+    ///     GET /api/transactions/me?page=2&amp;pageSize=5
+    ///     GET /api/transactions/me?type=1
+    ///     GET /api/transactions/me?dateFrom=2026-01-01&amp;dateTo=2026-12-31
+    ///     GET /api/transactions/me?amountMin=100&amp;amountMax=5000
+    ///
+    /// Tipos de transacción: 1=Deposit, 2=TransferIn, 3=TransferOut
+    /// </remarks>
+    /// <param name="query">Filtros y parámetros de paginación desde la query string.</param>
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(PagedResultDto<TransactionItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyHistory([FromQuery] TransactionQueryDto query)
+    {
+        // Validaciones de formato de paginación
+        if (query.Page <= 0)
+            return BadRequest(new { error = "El número de página debe ser mayor a 0." });
+
+        if (query.PageSize <= 0)
+            return BadRequest(new { error = "El tamaño de página debe ser mayor a 0." });
+
+        // TODO: reemplazar por claim del JWT cuando se implemente [Authorize]
+        int userId = 1;
+
+        try
+        {
+            var result = await _transactionService.GetHistoryAsync(userId, query);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
         }
     }
 }
