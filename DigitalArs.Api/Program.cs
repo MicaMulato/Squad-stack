@@ -50,6 +50,8 @@ namespace DigitalArs
                 builder.Configuration.GetSection("DepositSettings"));
             builder.Services.AddScoped<DigitalArs.Application.Interfaces.IAccountService,
                 DigitalArs.Infrastructure.Services.AccountService>();
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.ITransactionService,
+                DigitalArs.Infrastructure.Services.TransactionService>();
 
             var app = builder.Build();
 
