@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using DigitalArs.Application.DTOs.Accounts;
+using DigitalArs.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalArs.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-    
 public class AccountsController : ControllerBase
 {
     private readonly IAccountService _accountService;
@@ -19,10 +20,13 @@ public class AccountsController : ControllerBase
 
     // GET /api/accounts/me
     [HttpGet("me")]
-    public async Task<ActionResult<AccountDto>> GetMyAccount(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AccountResponse>> GetMyAccount(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!Guid.TryParse(userIdClaim, out var userId))
+        if (!int.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
@@ -37,9 +41,13 @@ public class AccountsController : ControllerBase
     }
 
     // GET /api/accounts/{id}
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<AccountDto>> GetAccountById(Guid id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AccountResponse>> GetAccountById(int id, CancellationToken cancellationToken)
     {
         var account = await _accountService.GetAccountByIdAsync(id, cancellationToken);
         if (account is null)
