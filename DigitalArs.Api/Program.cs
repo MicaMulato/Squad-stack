@@ -2,6 +2,7 @@ using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
 using DigitalArs.Infrastructure.Repositories;
+using DigitalArs.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +34,9 @@ namespace DigitalArs
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            // Servicio de hashing de contraseñas
+            builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 
             // ============================================================
             // Repository generico + Unit of Work
