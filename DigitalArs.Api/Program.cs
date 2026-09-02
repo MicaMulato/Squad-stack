@@ -43,6 +43,12 @@ namespace DigitalArs
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // ============================================================
+            // Servicios de aplicación
+            // ============================================================
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.ITransactionService,
+                DigitalArs.Infrastructure.Services.TransactionService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
