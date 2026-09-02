@@ -43,6 +43,14 @@ namespace DigitalArs
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // ============================================================
+            // Servicios de aplicación
+            // ============================================================
+            builder.Services.Configure<DigitalArs.Application.Settings.DepositSettings>(
+                builder.Configuration.GetSection("DepositSettings"));
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.IAccountService,
+                DigitalArs.Infrastructure.Services.AccountService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
