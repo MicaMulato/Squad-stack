@@ -1,4 +1,5 @@
 using DigitalArs.Application.DTOs;
+using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,10 +39,12 @@ public class AccountsController : ControllerBase
     /// <response code="200">Depósito realizado correctamente.</response>
     /// <response code="400">Monto inválido, límite superado o cuenta bloqueada.</response>
     /// <response code="404">No se encontró cuenta para el usuario.</response>
+    /// <response code="500">Error interno en el servidor.</response>
     [HttpPost("deposit")]
     [ProducesResponseType(typeof(DepositResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Deposit([FromBody] DepositRequestDto dto)
     {
         // Validación: amount > 0

@@ -1,3 +1,4 @@
+using System.Reflection;
 using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
@@ -7,6 +8,7 @@ using DigitalArs.Infrastructure.Repositories;
 using DigitalArs.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 namespace DigitalArs
 {
@@ -19,7 +21,52 @@ namespace DigitalArs
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            
+            // ============================================================
+            // Swagger / OpenAPI (HU-19)
+            // ============================================================
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "DigitalArs API - Billetera Virtual",
+                    Version = "v1",
+                    Description = "API REST de DigitalArs para gestión de usuarios, cuentas bancarias, depósitos y transferencias monetarias.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Equipo DigitalArs",
+                        Url = new Uri("https://github.com/MicaMulato/Squad-stack")
+                    }
+                });
+
+                // Configuración de esquema Bearer JWT para el botón Authorize (HU-19)
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Ingrese el token JWT. Ejemplo: Bearer {token}"
+                });
+
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecuritySchemeReference("Bearer"),
+                        new List<string>()
+                    }
+                });
+
+                // Incluir documentación XML de la API
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath))
+                {
+                    options.IncludeXmlComments(xmlPath);
+                }
+            });
             builder.Services.AddOpenApi();
 
             // ============================================================
@@ -67,6 +114,12 @@ namespace DigitalArs
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "DigitalArs API v1");
+                    c.RoutePrefix = "swagger"; // Accesible en /swagger
+                });
                 app.MapOpenApi();
             }
 
