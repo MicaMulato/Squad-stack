@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
@@ -32,6 +32,9 @@ namespace DigitalArs.Infrastructure.Repositories
         {
             return await _dbSet.Where(predicate).ToListAsync();
         }
+
+        /// <inheritdoc />
+        public IQueryable<T> Query() => _dbSet.AsQueryable();
         public async Task AddAsync( T entity)
         {
             await _dbSet.AddAsync(entity);
