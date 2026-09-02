@@ -1,3 +1,4 @@
+using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
@@ -45,6 +46,7 @@ namespace DigitalArs
             // ============================================================
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddApplication(); // ← registra Mapster + FluentValidation
 
             var app = builder.Build();
 

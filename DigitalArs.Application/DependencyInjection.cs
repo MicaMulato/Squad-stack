@@ -1,5 +1,6 @@
 using System.Reflection;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +27,14 @@ public static class DependencyInjection
         services.AddScoped<IMapper, ServiceMapper>();
 
         // === FluentValidation ===
+        services.AddFluentValidationAutoValidation();
+        // Requiere el paquete FluentValidation.AspNetCore
         // Registra todos los AbstractValidator<T> del ensamblado.
         services.AddValidatorsFromAssembly(assembly);
+
+
+        // === Application Services ===
+        services.AddScoped<Interfaces.IUserService, Services.UserService>();
 
         return services;
     }
