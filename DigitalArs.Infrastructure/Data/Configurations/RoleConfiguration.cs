@@ -23,14 +23,18 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Id = 1,
                 Name = "Admin",
                 NormalizedName = "ADMIN",
-                Description = "Administrador con permisos elevados para gestionar usuarios"
+                Description = "Administrador con permisos elevados para gestionar usuarios",
+                // ConcurrencyStamp fijo: evita que EF genere un diff espurio en cada
+                // scaffold de migracion (sin valor fijo se regenera un GUID cada vez).
+                ConcurrencyStamp = "seed-role-admin-concurrency"
             },
             new Role
             {
                 Id = 2,
                 Name = "User",
                 NormalizedName = "USER",
-                Description = "Usuario estandar de la billetera virtual"
+                Description = "Usuario estandar de la billetera virtual",
+                ConcurrencyStamp = "seed-role-user-concurrency"
             }
         );
     }

@@ -42,7 +42,7 @@ cd Squad-stack
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=DigitalArsDb;Trusted_Connection=true;TrustServerCertificate=true;"
+    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=DigitalArsDb;Trusted_Connection=true;TrustServerCertificate=true;"
   }
 }
 ```

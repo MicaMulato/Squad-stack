@@ -78,8 +78,12 @@ namespace DigitalArs.Infrastructure.Repositories
 
         public void Dispose()
         {
+            // El ApplicationDbContext es Scoped: su ciclo de vida lo gestiona el
+            // contenedor de DI, que lo dispone al terminar la request. El UoW NO
+            // debe disponerlo (lo comparte con UserManager/RoleManager de Identity);
+            // hacerlo provocaria ObjectDisposedException. Solo disponemos lo que
+            // el UoW crea: la transaccion en curso, si quedo abierta.
             _currentTransaction?.Dispose();
-            _context.Dispose();
         }
     }
 }

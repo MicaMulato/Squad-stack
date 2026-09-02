@@ -1,7 +1,9 @@
+using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
 using DigitalArs.Infrastructure.Repositories;
+using DigitalArs.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,8 +25,7 @@ namespace DigitalArs
             // DbContext
             // ============================================================
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-                    .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Identity — habilita UserManager<User> / RoleManager<Role>
             builder.Services.AddIdentity<User, Role>(options =>
@@ -35,6 +36,9 @@ namespace DigitalArs
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Servicio de hashing de contraseñas
+            builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
+
             // ============================================================
             // Repository generico + Unit of Work
             // (solo para entidades que heredan BaseEntity: Account, Transaction, etc.
@@ -42,6 +46,7 @@ namespace DigitalArs
             // ============================================================
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddApplication(); // ← registra Mapster + FluentValidation
 
             // ============================================================
             // Servicios de aplicación
