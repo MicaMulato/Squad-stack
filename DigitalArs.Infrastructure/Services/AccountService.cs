@@ -1,8 +1,10 @@
-using DigitalArs.Application.Settings;
 using DigitalArs.Application.DTOs;
+using DigitalArs.Application.DTOs.Accounts;
 using DigitalArs.Application.Interfaces;
+using DigitalArs.Application.Settings;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Domain.Enums;
+using MapsterMapper;
 using Microsoft.Extensions.Options;
 
 namespace DigitalArs.Infrastructure.Services;
@@ -15,12 +17,44 @@ namespace DigitalArs.Infrastructure.Services;
 public class AccountService : IAccountService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
     private readonly DepositSettings _depositSettings;
 
-    public AccountService(IUnitOfWork unitOfWork, IOptions<DepositSettings> depositOptions)
+    public AccountService(
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IOptions<DepositSettings> depositOptions)
     {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
         _depositSettings = depositOptions.Value;
+    }
+
+    /// <inheritdoc />
+    public async Task<AccountResponse?> GetAccountByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var accounts = await _unitOfWork.Repository<Account>()
+            .FindAsync(a => a.UserId == userId);
+
+        var account = accounts.FirstOrDefault();
+        if (account == null)
+        {
+            return null;
+        }
+
+        return _mapper.Map<AccountResponse>(account);
+    }
+
+    /// <inheritdoc />
+    public async Task<AccountResponse?> GetAccountByIdAsync(int accountId, CancellationToken cancellationToken = default)
+    {
+        var account = await _unitOfWork.Repository<Account>().GetByIdAsync(accountId);
+        if (account == null)
+        {
+            return null;
+        }
+
+        return _mapper.Map<AccountResponse>(account);
     }
 
     /// <inheritdoc />
