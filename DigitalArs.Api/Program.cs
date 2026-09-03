@@ -1,3 +1,4 @@
+using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Application.Services;
@@ -58,7 +59,20 @@ namespace DigitalArs
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddApplication(); // ← registra Mapster + FluentValidation
 
+            // ============================================================
+            // Servicios de aplicación
+            // ============================================================
+            builder.Services.Configure<DigitalArs.Application.Settings.DepositSettings>(
+                builder.Configuration.GetSection("DepositSettings"));
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.IAccountService,
+                DigitalArs.Infrastructure.Services.AccountService>();
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.ITransactionService,
+                DigitalArs.Infrastructure.Services.TransactionService>();
+
             var app = builder.Build();
+
+            // Manejo global de excepciones (HU-18)
+            app.UseGlobalExceptionHandler();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

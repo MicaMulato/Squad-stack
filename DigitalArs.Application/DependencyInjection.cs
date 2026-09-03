@@ -32,7 +32,6 @@ public static class DependencyInjection
         // Registra todos los AbstractValidator<T> del ensamblado.
         services.AddValidatorsFromAssembly(assembly);
 
-
         // === Application Services ===
         services.AddScoped<Interfaces.IUserService, Services.UserService>();
 
