@@ -2,9 +2,11 @@ using System.Reflection;
 using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
+using DigitalArs.Application.Services;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
 using DigitalArs.Infrastructure.Repositories;
+using DigitalArs.Infrastructure.Security;
 using DigitalArs.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +107,13 @@ namespace DigitalArs
             // Servicio de hashing de contraseñas
             builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 
+            //Mapea "JwtSettings" del appsettings.json a la clase JwtSettings
+            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
+            // Token Generator y Servicio de Autenticación
+            builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+
             // ============================================================
             // Repository generico + Unit of Work
             // (solo para entidades que heredan BaseEntity: Account, Transaction, etc.
@@ -140,6 +149,7 @@ namespace DigitalArs
                 });
                 app.MapOpenApi();
             }
+            
 
             app.UseHttpsRedirection();
 

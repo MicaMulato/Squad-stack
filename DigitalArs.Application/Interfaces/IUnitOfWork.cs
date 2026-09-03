@@ -1,8 +1,11 @@
-﻿namespace DigitalArs.Application.Interfaces
+﻿using DigitalArs.Domain.Entities;
+namespace DigitalArs.Application.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        IBaseRepository<T> Repository<T>() where T : DigitalArs.Domain.Entities.BaseEntity;
+        IBaseRepository<T> Repository<T>() where T : BaseEntity;
+        //Excepcion para User
+        IBaseRepository<User> Users { get; }
 
         Task<int> SaveChangesAsync();
 
