@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DigitalArs.Infrastructure.Repositories
 {
-    public class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity 
+    public class BaseRepository<T> : IBaseRepository<T> where T : class 
     {
         protected readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;

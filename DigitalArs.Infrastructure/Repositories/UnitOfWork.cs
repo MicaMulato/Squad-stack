@@ -1,7 +1,7 @@
 ﻿using DigitalArs.Application.Interfaces;
-using Microsoft.EntityFrameworkCore.Storage;
-using DigitalArs.Infrastructure.Data;
 using DigitalArs.Domain.Entities;
+using DigitalArs.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DigitalArs.Infrastructure.Repositories
 {
@@ -15,10 +15,17 @@ namespace DigitalArs.Infrastructure.Repositories
 
         private IDbContextTransaction? _currentTransaction;
 
+        //campo para cachear el repositorio de usuarios
+        private IBaseRepository<User>? _userRepository;
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
         }
+
+        //Propiedad requerida por IUnitOfWork para excepcion de User
+        public IBaseRepository<User> Users =>
+            _userRepository ??= new BaseRepository<User>(_context);
+
         public IBaseRepository<T> Repository<T>() where T : BaseEntity
         {
             var type = typeof(T);
