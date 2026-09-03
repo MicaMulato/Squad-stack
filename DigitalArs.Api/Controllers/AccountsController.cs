@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using DigitalArs.Application.DTOs;
 using DigitalArs.Application.DTOs.Accounts;
+using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,23 +25,37 @@ public class AccountsController : ControllerBase
     /// <summary>
     /// Obtiene la información y saldo de la cuenta del usuario autenticado (HU-14).
     /// </summary>
+    /// <returns>Datos de la cuenta bancaria del usuario.</returns>
+    /// <response code="200">Datos de la cuenta obtenidos exitosamente.</response>
+    /// <response code="401">Usuario no autenticado.</response>
+    /// <response code="404">No se encontró una cuenta asociada al usuario.</response>
     [HttpGet("me")]
     [Authorize]
     [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AccountResponse>> GetMyAccount(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!int.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized();
+            return Unauthorized(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status401Unauthorized,
+                Message = "No autorizado.",
+                TraceId = HttpContext.TraceIdentifier
+            });
         }
 
         var account = await _accountService.GetAccountByUserIdAsync(userId, cancellationToken);
         if (account is null)
         {
-            return NotFound("No se encontró una cuenta asociada al usuario.");
+            return NotFound(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status404NotFound,
+                Message = "No se encontró una cuenta asociada al usuario.",
+                TraceId = HttpContext.TraceIdentifier
+            });
         }
 
         return Ok(account);
@@ -49,18 +64,30 @@ public class AccountsController : ControllerBase
     /// <summary>
     /// Obtiene una cuenta por su ID (solo administradores) (HU-14).
     /// </summary>
+    /// <param name="id">ID de la cuenta a consultar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Datos de la cuenta bancaria.</returns>
+    /// <response code="200">Datos de la cuenta encontrados.</response>
+    /// <response code="401">Usuario no autenticado.</response>
+    /// <response code="403">No tiene permisos de administrador.</response>
+    /// <response code="404">No se encontró la cuenta con el ID especificado.</response>
     [HttpGet("{id:int}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AccountResponse>> GetAccountById(int id, CancellationToken cancellationToken)
     {
         var account = await _accountService.GetAccountByIdAsync(id, cancellationToken);
         if (account is null)
         {
-            return NotFound($"No se encontró la cuenta con ID: {id}");
+            return NotFound(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status404NotFound,
+                Message = $"No se encontró la cuenta con ID: {id}",
+                TraceId = HttpContext.TraceIdentifier
+            });
         }
 
         return Ok(account);
@@ -86,15 +113,22 @@ public class AccountsController : ControllerBase
     /// <response code="200">Depósito realizado correctamente.</response>
     /// <response code="400">Monto inválido, límite superado o cuenta bloqueada.</response>
     /// <response code="404">No se encontró cuenta para el usuario.</response>
+    /// <response code="500">Error interno en el servidor.</response>
     [HttpPost("deposit")]
     [ProducesResponseType(typeof(DepositResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Deposit([FromBody] DepositRequestDto dto)
     {
         // Validación: amount > 0
         if (dto.Amount <= 0)
-            return BadRequest(new { error = "El monto debe ser mayor a 0." });
+            return BadRequest(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = "El monto debe ser mayor a 0.",
+                TraceId = HttpContext.TraceIdentifier
+            });
 
         // Obtener userId de claims si está autenticado, o fallback para desarrollo
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -107,15 +141,30 @@ public class AccountsController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = ex.Message,
+                TraceId = HttpContext.TraceIdentifier
+            });
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { error = ex.Message });
+            return NotFound(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status404NotFound,
+                Message = ex.Message,
+                TraceId = HttpContext.TraceIdentifier
+            });
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new ErrorResponse
+            {
+                StatusCode = StatusCodes.Status400BadRequest,
+                Message = ex.Message,
+                TraceId = HttpContext.TraceIdentifier
+            });
         }
     }
 }

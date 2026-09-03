@@ -1,4 +1,5 @@
 using DigitalArs.Application.DTOs;
+using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,8 +37,9 @@ public class TransactionsController : ControllerBase
     /// </remarks>
     [HttpPost("transfer")]
     [ProducesResponseType(typeof(TransferResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Transfer([FromBody] TransferRequestDto dto)
     {
         if (dto.Amount <= 0)
@@ -85,8 +87,9 @@ public class TransactionsController : ControllerBase
     /// <param name="query">Filtros y parámetros de paginación desde la query string.</param>
     [HttpGet("me")]
     [ProducesResponseType(typeof(PagedResultDto<TransactionItemDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetMyHistory([FromQuery] TransactionQueryDto query)
     {
         // Validaciones de formato de paginación
