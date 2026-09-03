@@ -21,6 +21,24 @@ namespace DigitalArs
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            // ============================================================
+            // Configuración de CORS (HU-20)
+            // ============================================================
+            const string corsPolicyName = "AllowFrontend";
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                ?? new[] { "http://localhost:5173" };
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(corsPolicyName, policy =>
+                {
+                    policy.WithOrigins(allowedOrigins)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
             
             // ============================================================
             // Swagger / OpenAPI (HU-19)
@@ -124,6 +142,9 @@ namespace DigitalArs
             }
 
             app.UseHttpsRedirection();
+
+            // CORS (HU-20) — debe ejecutarse antes de UseAuthentication y UseAuthorization
+            app.UseCors(corsPolicyName);
 
             // UseAuthentication SIEMPRE antes de UseAuthorization.
             app.UseAuthentication();
