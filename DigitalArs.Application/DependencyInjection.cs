@@ -31,8 +31,9 @@ public static class DependencyInjection
         // Requiere el paquete FluentValidation.AspNetCore
         // Registra todos los AbstractValidator<T> del ensamblado.
         services.AddValidatorsFromAssembly(assembly);
+
         // === Application Services ===
-        services.AddScoped<Interfaces.IAccountService, Services.AccountService>();
+        services.AddScoped<Interfaces.IUserService, Services.UserService>();
 
         return services;
     }

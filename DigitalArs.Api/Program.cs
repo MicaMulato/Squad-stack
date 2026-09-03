@@ -3,6 +3,7 @@ using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
 using DigitalArs.Infrastructure.Repositories;
+using DigitalArs.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,6 +36,9 @@ namespace DigitalArs
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Servicio de hashing de contraseñas
+            builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
+
             // ============================================================
             // Repository generico + Unit of Work
             // (solo para entidades que heredan BaseEntity: Account, Transaction, etc.
@@ -43,6 +47,16 @@ namespace DigitalArs
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddApplication(); // ← registra Mapster + FluentValidation
+
+            // ============================================================
+            // Servicios de aplicación
+            // ============================================================
+            builder.Services.Configure<DigitalArs.Application.Settings.DepositSettings>(
+                builder.Configuration.GetSection("DepositSettings"));
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.IAccountService,
+                DigitalArs.Infrastructure.Services.AccountService>();
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.ITransactionService,
+                DigitalArs.Infrastructure.Services.TransactionService>();
 
             var app = builder.Build();
 
