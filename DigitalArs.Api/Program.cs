@@ -1,3 +1,4 @@
+using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
@@ -59,6 +60,9 @@ namespace DigitalArs
                 DigitalArs.Infrastructure.Services.TransactionService>();
 
             var app = builder.Build();
+
+            // Manejo global de excepciones (HU-18)
+            app.UseGlobalExceptionHandler();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
