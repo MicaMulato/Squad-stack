@@ -1,4 +1,4 @@
-namespace DigitalArs.Domain.Entities;
+﻿namespace DigitalArs.Domain.Entities;
 
 public class Account : BaseEntity
 {
@@ -12,4 +12,7 @@ public class Account : BaseEntity
 
     // Propiedad de navegación bidireccional con Transaction
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+    // Propiedad de navegación bidireccional con FixedTermDeposit (HU-33)
+    public ICollection<FixedTermDeposit> FixedTermDeposits { get; set; } = new List<FixedTermDeposit>();
 }
