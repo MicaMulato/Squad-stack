@@ -1,48 +1,53 @@
 ﻿using DigitalArs.Application.DTOs.Auth;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DigitalArs.Application.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly UserManager<User> _userManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
     public AuthService(
-        IUnitOfWork unitOfWork,
-        IPasswordHasher passwordHasher,
+        UserManager<User> userManager,
         IJwtTokenGenerator jwtTokenGenerator)
     {
-        _unitOfWork = unitOfWork;
-        _passwordHasher = passwordHasher;
+        _userManager = userManager;
         _jwtTokenGenerator = jwtTokenGenerator;
     }
     public async Task<LoginResponse?> LoginAsync(LoginRequest request)
     {
-        var users = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
-        var user = users.FirstOrDefault();
-        //Chequear que exista el usuario y que la contraseña sea correcta
-        if (user is null || string.IsNullOrEmpty(user.PasswordHash)) return null;
+        var user = await _userManager.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        //Verificar la contraseña usando el IPasswordHasher
-        if (!_passwordHasher.Verify(request.Password, user.PasswordHash)) return null;
-
+        if (user is null) return null;
+        //Validar contraseña
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+        if (!isPasswordValid) return null;
+        
         //Validar si el usuario esta activo
         if (user.IsDeleted)
         {
             throw new UnauthorizedAccessException("El usuario se encuentra inactivo");
         }
+        //Obtener rol
+        var roles = await _userManager.GetRolesAsync(user);
+        var roleName = roles.FirstOrDefault() ?? user.Role?.Name ?? "User";
 
-        var role = user.Role?.Name ?? "User";
-
-        var (token, expiresAt) = _jwtTokenGenerator.GenerateToken(user, role);
+        // Token segun el rol
+        var (token, expiresAt) = _jwtTokenGenerator.GenerateToken(user, roleName);
 
         return new LoginResponse
         {
             Token = token,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            UserId = user.Id,
+            Email = user.Email ?? string.Empty,
+            Role = roleName
         };
     }
 }   

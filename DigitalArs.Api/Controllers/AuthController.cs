@@ -1,6 +1,7 @@
 ﻿using DigitalArs.Application.DTOs.Auth;
 using DigitalArs.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArs.Api.Controllers;
 
@@ -15,6 +16,7 @@ public class AuthController : ControllerBase
     }
 
     //POST api/auth/login
+    [AllowAnonymous] //Permite acceder sin JWT
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
