@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
 using DigitalArs.Application.Interfaces;
@@ -8,8 +9,11 @@ using DigitalArs.Infrastructure.Data;
 using DigitalArs.Infrastructure.Repositories;
 using DigitalArs.Infrastructure.Security;
 using DigitalArs.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
 namespace DigitalArs
@@ -46,7 +50,7 @@ namespace DigitalArs
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
+                    Type = SecuritySchemeType.ApiKey,
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
@@ -55,10 +59,9 @@ namespace DigitalArs
 
                 options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
-                    {
-                        new OpenApiSecuritySchemeReference("Bearer"),
-                        new List<string>()
-                    }
+                
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+                
                 });
 
                 // Incluir documentación XML de la API
@@ -71,7 +74,6 @@ namespace DigitalArs
             });
             builder.Services.AddOpenApi();
 
-            builder.Services.AddSwaggerGen();
             // ============================================================
             // DbContext
             // ============================================================
@@ -86,6 +88,41 @@ namespace DigitalArs
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            //Configuracion de JWT
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+            var secretKey = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+                    ClockSkew = TimeSpan.Zero,
+                    NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                };
+            });
+
+            //[Authorize] por defecto
+            builder.Services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+            });
 
             // Servicio de hashing de contraseñas
             builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
@@ -131,8 +168,6 @@ namespace DigitalArs
                     c.RoutePrefix = "swagger"; // Accesible en /swagger
                 });
                 app.MapOpenApi();
-                app.UseSwagger();
-                app.UseSwaggerUI();
             }
             
 
