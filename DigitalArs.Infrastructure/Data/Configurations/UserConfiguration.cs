@@ -98,6 +98,57 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 RoleId = 2,
                 IsDeleted = false,
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new User
+            {
+                Id = 4,
+                FirstName = "Alejandro",
+                LastName = "Silva",
+                Email = "alejandro.silva@digitalars.com",
+                NormalizedEmail = "ALEJANDRO.SILVA@DIGITALARS.COM",
+                UserName = "alejandro.silva@digitalars.com",
+                NormalizedUserName = "ALEJANDRO.SILVA@DIGITALARS.COM",
+                EmailConfirmed = true,
+                PasswordHash = "AQAAAAIAAYagAAAAEIF4BH6BgJcp+Hmu8tYbCiyDyfC8/R3A8lus7ILAex/9qAxhI8YRaq7+ERYrGrRrYg==",
+                SecurityStamp = "SEED-USER4-SECURITY-STAMP",
+                ConcurrencyStamp = "seed-user4-concurrency",
+                RoleId = 2,
+                IsDeleted = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new User
+            {
+                Id = 5,
+                FirstName = "Micaela",
+                LastName = "Mulato",
+                Email = "micaela.mulato@digitalars.com",
+                NormalizedEmail = "MICAELA.MULATO@DIGITALARS.COM",
+                UserName = "micaela.mulato@digitalars.com",
+                NormalizedUserName = "MICAELA.MULATO@DIGITALARS.COM",
+                EmailConfirmed = true,
+                PasswordHash = "AQAAAAIAAYagAAAAEPlWIfeBvEa2UIgXOAlJgZkhZ9W+6n3zxsEIiVncqS9jY+6qmsMbOL+u+DeaM10S1w==",
+                SecurityStamp = "SEED-USER5-SECURITY-STAMP",
+                ConcurrencyStamp = "seed-user5-concurrency",
+                RoleId = 2,
+                IsDeleted = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new User
+            {
+                Id = 6,
+                FirstName = "Emmanuel",
+                LastName = "Torres",
+                Email = "emmanuel.torres@digitalars.com",
+                NormalizedEmail = "EMMANUEL.TORRES@DIGITALARS.COM",
+                UserName = "emmanuel.torres@digitalars.com",
+                NormalizedUserName = "EMMANUEL.TORRES@DIGITALARS.COM",
+                EmailConfirmed = true,
+                PasswordHash = "AQAAAAIAAYagAAAAEISvy59LTmpoZ20JI0rhgziQdnw7hg1vq272APTffUCeMWtHb8rAl0V5Src75EltPA==",
+                SecurityStamp = "SEED-USER6-SECURITY-STAMP",
+                ConcurrencyStamp = "seed-user6-concurrency",
+                RoleId = 2,
+                IsDeleted = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }

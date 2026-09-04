@@ -1,4 +1,5 @@
 using DigitalArs.Domain.Entities;
+using DigitalArs.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -46,5 +47,185 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .HasForeignKey(t => t.ToAccountId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // === Data Seeding ===
+        builder.HasData(
+            new Transaction
+            {
+                Id = 1,
+                AccountId = 4,
+                ToAccountId = null,
+                Amount = 43730.50m,
+                Type = TransactionType.Deposit,
+                Concept = "Depósito inicial de fondos",
+                Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 2,
+                AccountId = 2,
+                ToAccountId = null,
+                Amount = 239000.00m,
+                Type = TransactionType.Deposit,
+                Concept = "Depósito inicial",
+                Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 3,
+                AccountId = 3,
+                ToAccountId = null,
+                Amount = 193500.50m,
+                Type = TransactionType.Deposit,
+                Concept = "Depósito inicial",
+                Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 4,
+                AccountId = 5,
+                ToAccountId = null,
+                Amount = 340000.00m,
+                Type = TransactionType.Deposit,
+                Concept = "Depósito inicial",
+                Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 5,
+                AccountId = 6,
+                ToAccountId = null,
+                Amount = 404000.00m,
+                Type = TransactionType.Deposit,
+                Concept = "Depósito inicial",
+                Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
+            },
+            // Alejandro (4) -> Roberto Carlos (2) $15,000.00
+            new Transaction
+            {
+                Id = 6,
+                AccountId = 4,
+                ToAccountId = 2,
+                Amount = 15000.00m,
+                Type = TransactionType.TransferOut,
+                Concept = "Transferencia enviada a Roberto Carlos",
+                Date = new DateTime(2026, 8, 10, 14, 30, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 7,
+                AccountId = 2,
+                ToAccountId = 4,
+                Amount = 15000.00m,
+                Type = TransactionType.TransferIn,
+                Concept = "Transferencia recibida de Alejandro Silva",
+                Date = new DateTime(2026, 8, 10, 14, 30, 0, DateTimeKind.Utc)
+            },
+            // Micaela (5) -> Alejandro (4) $25,000.00
+            new Transaction
+            {
+                Id = 8,
+                AccountId = 5,
+                ToAccountId = 4,
+                Amount = 25000.00m,
+                Type = TransactionType.TransferOut,
+                Concept = "Transferencia enviada a Alejandro Silva",
+                Date = new DateTime(2026, 8, 18, 11, 15, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 9,
+                AccountId = 4,
+                ToAccountId = 5,
+                Amount = 25000.00m,
+                Type = TransactionType.TransferIn,
+                Concept = "Transferencia recibida de Micaela Mulato",
+                Date = new DateTime(2026, 8, 18, 11, 15, 0, DateTimeKind.Utc)
+            },
+            // Alejandro (4) -> Emmanuel Torres (6) $12,000.00
+            new Transaction
+            {
+                Id = 10,
+                AccountId = 4,
+                ToAccountId = 6,
+                Amount = 12000.00m,
+                Type = TransactionType.TransferOut,
+                Concept = "Transferencia enviada a Emmanuel Torres",
+                Date = new DateTime(2026, 8, 25, 16, 45, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 11,
+                AccountId = 6,
+                ToAccountId = 4,
+                Amount = 12000.00m,
+                Type = TransactionType.TransferIn,
+                Concept = "Transferencia recibida de Alejandro Silva",
+                Date = new DateTime(2026, 8, 25, 16, 45, 0, DateTimeKind.Utc)
+            },
+            // Alejandro (4) -> Micaela Mulato (5) $5,000.00
+            new Transaction
+            {
+                Id = 12,
+                AccountId = 4,
+                ToAccountId = 5,
+                Amount = 5000.00m,
+                Type = TransactionType.TransferOut,
+                Concept = "Transferencia enviada a Micaela Mulato",
+                Date = new DateTime(2026, 9, 1, 18, 20, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 13,
+                AccountId = 5,
+                ToAccountId = 4,
+                Amount = 5000.00m,
+                Type = TransactionType.TransferIn,
+                Concept = "Transferencia recibida de Alejandro Silva",
+                Date = new DateTime(2026, 9, 1, 18, 20, 0, DateTimeKind.Utc)
+            },
+            // Mohammed Khan (3) -> Alejandro (4) $8,500.00
+            new Transaction
+            {
+                Id = 14,
+                AccountId = 3,
+                ToAccountId = 4,
+                Amount = 8500.00m,
+                Type = TransactionType.TransferOut,
+                Concept = "Transferencia enviada a Alejandro Silva",
+                Date = new DateTime(2026, 9, 2, 10, 0, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 15,
+                AccountId = 4,
+                ToAccountId = 3,
+                Amount = 8500.00m,
+                Type = TransactionType.TransferIn,
+                Concept = "Transferencia recibida de Mohammed Khan",
+                Date = new DateTime(2026, 9, 2, 10, 0, 0, DateTimeKind.Utc)
+            },
+            // Emmanuel Torres (6) -> Roberto Carlos (2) $6,000.00
+            new Transaction
+            {
+                Id = 16,
+                AccountId = 6,
+                ToAccountId = 2,
+                Amount = 6000.00m,
+                Type = TransactionType.TransferOut,
+                Concept = "Transferencia enviada a Roberto Carlos",
+                Date = new DateTime(2026, 9, 3, 9, 30, 0, DateTimeKind.Utc)
+            },
+            new Transaction
+            {
+                Id = 17,
+                AccountId = 2,
+                ToAccountId = 6,
+                Amount = 6000.00m,
+                Type = TransactionType.TransferIn,
+                Concept = "Transferencia recibida de Emmanuel Torres",
+                Date = new DateTime(2026, 9, 3, 9, 30, 0, DateTimeKind.Utc)
+            }
+        );
     }
 }

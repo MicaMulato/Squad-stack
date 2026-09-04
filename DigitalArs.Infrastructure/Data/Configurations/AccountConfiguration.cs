@@ -65,6 +65,30 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 Money = 185000.50m,
                 IsBlocked = false,
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                Id = 4,
+                UserId = 4, // Alejandro Silva
+                Money = 45230.50m,
+                IsBlocked = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                Id = 5,
+                UserId = 5, // Micaela Mulato
+                Money = 320000.00m,
+                IsBlocked = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                Id = 6,
+                UserId = 6, // Emmanuel Torres
+                Money = 410000.00m,
+                IsBlocked = false,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }

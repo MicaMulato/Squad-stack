@@ -194,6 +194,19 @@ namespace DigitalArs
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                try
+                {
+                    using var scope = app.Services.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    db.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"[DB MIGRATION] Advertencia al migrar: {ex.Message}");
+                    Console.ResetColor();
+                }
+
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
