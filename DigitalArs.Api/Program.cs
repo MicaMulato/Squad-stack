@@ -68,18 +68,16 @@ namespace DigitalArs
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
+                    Type = SecuritySchemeType.Http,
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Ingrese el token JWT. Ejemplo: Bearer {token}"
+                    Description = "Ingrese su token JWT (no es necesario escribir 'Bearer ')"
                 });
 
                 options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
-                
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
-                
                 });
 
                 // Incluir documentación XML de la API
@@ -119,6 +117,8 @@ namespace DigitalArs
             })
             .AddJwtBearer(options =>
             {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -128,9 +128,24 @@ namespace DigitalArs
                     ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(secretKey),
-                    ClockSkew = TimeSpan.Zero,
-                    NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    ClockSkew = TimeSpan.Zero
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"[JWT FAILED] Error: {context.Exception.Message}");
+                        Console.ResetColor();
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"[JWT CHALLENGE] Error: {context.Error}, Desc: {context.ErrorDescription}");
+                        Console.ResetColor();
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

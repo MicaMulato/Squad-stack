@@ -1,3 +1,4 @@
+using DigitalArs.Api.Extensions;
 using DigitalArs.Application.DTOs;
 using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.Interfaces;
@@ -45,8 +46,7 @@ public class TransactionsController : ControllerBase
         if (dto.Amount <= 0)
             return BadRequest(new { error = "El monto debe ser mayor a 0." });
 
-        // TODO: reemplazar por claim del JWT cuando se implemente [Authorize]
-        int userId = 1;
+        var userId = User.GetUserId();
 
         try
         {
@@ -99,8 +99,7 @@ public class TransactionsController : ControllerBase
         if (query.PageSize <= 0)
             return BadRequest(new { error = "El tamaño de página debe ser mayor a 0." });
 
-        // TODO: reemplazar por claim del JWT cuando se implemente [Authorize]
-        int userId = 1;
+        var userId = User.GetUserId();
 
         try
         {
@@ -113,3 +112,4 @@ public class TransactionsController : ControllerBase
         }
     }
 }
+

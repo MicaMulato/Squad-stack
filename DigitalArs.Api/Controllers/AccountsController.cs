@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using DigitalArs.Api.Extensions;
 using DigitalArs.Application.DTOs;
 using DigitalArs.Application.DTOs.Accounts;
 using DigitalArs.Application.DTOs.Common;
@@ -30,23 +30,12 @@ public class AccountsController : ControllerBase
     /// <response code="401">Usuario no autenticado.</response>
     /// <response code="404">No se encontró una cuenta asociada al usuario.</response>
     [HttpGet("me")]
-    [Authorize]
     [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AccountResponse>> GetMyAccount(CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!int.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized(new ErrorResponse
-            {
-                StatusCode = StatusCodes.Status401Unauthorized,
-                Message = "No autorizado.",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
-
+        var userId = User.GetUserId();
         var account = await _accountService.GetAccountByUserIdAsync(userId, cancellationToken);
         if (account is null)
         {
@@ -130,9 +119,7 @@ public class AccountsController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
 
-        // Obtener userId de claims si está autenticado, o fallback para desarrollo
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int userId = int.TryParse(userIdClaim, out var parsedId) ? parsedId : 1;
+        var userId = User.GetUserId();
 
         try
         {
