@@ -8,4 +8,5 @@ namespace DigitalArs.Application.DTOs.Accounts;
 public record DepositRequest
 {
     public decimal Amount { get; init; }
+    public string? Concept { get; init; }
 }

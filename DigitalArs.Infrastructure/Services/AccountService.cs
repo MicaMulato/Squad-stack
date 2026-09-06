@@ -58,7 +58,7 @@ public class AccountService : IAccountService
     }
 
     /// <inheritdoc />
-    public async Task<DepositResponseDto> DepositAsync(int userId, decimal amount)
+    public async Task<DepositResponseDto> DepositAsync(int userId, decimal amount, string? concept = null)
     {
         // ── Validación: límite máximo por operación (viene de appsettings.json) ──
         if (amount > _depositSettings.MaxAmountPerOperation)
@@ -86,12 +86,14 @@ public class AccountService : IAccountService
         account.Money += amount;
         accountRepo.Update(account);
 
+        var motive = !string.IsNullOrWhiteSpace(concept) ? concept.Trim() : "Ahorro";
+
         var transaction = new Transaction
         {
             AccountId = account.Id,
             Amount    = amount,
             Type      = TransactionType.Deposit,
-            Concept   = "Depósito de fondos",
+            Concept   = motive,
             Date      = DateTime.UtcNow
         };
         await transactionRepo.AddAsync(transaction);

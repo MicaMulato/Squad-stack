@@ -48,7 +48,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // === Data Seeding ===
+        // === Data Seeding con Motivos Realistas de Billetera Virtual ===
         builder.HasData(
             new Transaction
             {
@@ -57,7 +57,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = null,
                 Amount = 43730.50m,
                 Type = TransactionType.Deposit,
-                Concept = "Depósito inicial de fondos",
+                Concept = "Haberes",
                 Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -67,7 +67,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = null,
                 Amount = 239000.00m,
                 Type = TransactionType.Deposit,
-                Concept = "Depósito inicial",
+                Concept = "Haberes",
                 Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -77,7 +77,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = null,
                 Amount = 193500.50m,
                 Type = TransactionType.Deposit,
-                Concept = "Depósito inicial",
+                Concept = "Haberes",
                 Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -87,7 +87,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = null,
                 Amount = 340000.00m,
                 Type = TransactionType.Deposit,
-                Concept = "Depósito inicial",
+                Concept = "Haberes",
                 Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -97,10 +97,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = null,
                 Amount = 404000.00m,
                 Type = TransactionType.Deposit,
-                Concept = "Depósito inicial",
+                Concept = "Haberes",
                 Date = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc)
             },
-            // Alejandro (4) -> Roberto Carlos (2) $15,000.00
+            // Alejandro (4) -> Roberto Carlos (2) $15,000.00: Alquiler
             new Transaction
             {
                 Id = 6,
@@ -108,7 +108,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 2,
                 Amount = 15000.00m,
                 Type = TransactionType.TransferOut,
-                Concept = "Transferencia enviada a Roberto Carlos",
+                Concept = "Alquiler",
                 Date = new DateTime(2026, 8, 10, 14, 30, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -118,10 +118,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 4,
                 Amount = 15000.00m,
                 Type = TransactionType.TransferIn,
-                Concept = "Transferencia recibida de Alejandro Silva",
+                Concept = "Alquiler",
                 Date = new DateTime(2026, 8, 10, 14, 30, 0, DateTimeKind.Utc)
             },
-            // Micaela (5) -> Alejandro (4) $25,000.00
+            // Micaela (5) -> Alejandro (4) $25,000.00: Honorarios
             new Transaction
             {
                 Id = 8,
@@ -129,7 +129,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 4,
                 Amount = 25000.00m,
                 Type = TransactionType.TransferOut,
-                Concept = "Transferencia enviada a Alejandro Silva",
+                Concept = "Honorarios profesionales",
                 Date = new DateTime(2026, 8, 18, 11, 15, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -139,10 +139,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 5,
                 Amount = 25000.00m,
                 Type = TransactionType.TransferIn,
-                Concept = "Transferencia recibida de Micaela Mulato",
+                Concept = "Honorarios profesionales",
                 Date = new DateTime(2026, 8, 18, 11, 15, 0, DateTimeKind.Utc)
             },
-            // Alejandro (4) -> Emmanuel Torres (6) $12,000.00
+            // Alejandro (4) -> Emmanuel Torres (6) $12,000.00: Servicios
             new Transaction
             {
                 Id = 10,
@@ -150,7 +150,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 6,
                 Amount = 12000.00m,
                 Type = TransactionType.TransferOut,
-                Concept = "Transferencia enviada a Emmanuel Torres",
+                Concept = "Cuentas y servicios",
                 Date = new DateTime(2026, 8, 25, 16, 45, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -160,10 +160,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 4,
                 Amount = 12000.00m,
                 Type = TransactionType.TransferIn,
-                Concept = "Transferencia recibida de Alejandro Silva",
+                Concept = "Cuentas y servicios",
                 Date = new DateTime(2026, 8, 25, 16, 45, 0, DateTimeKind.Utc)
             },
-            // Alejandro (4) -> Micaela Mulato (5) $5,000.00
+            // Alejandro (4) -> Micaela Mulato (5) $5,000.00: Comidas
             new Transaction
             {
                 Id = 12,
@@ -171,7 +171,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 5,
                 Amount = 5000.00m,
                 Type = TransactionType.TransferOut,
-                Concept = "Transferencia enviada a Micaela Mulato",
+                Concept = "Comidas y bebidas",
                 Date = new DateTime(2026, 9, 1, 18, 20, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -181,10 +181,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 4,
                 Amount = 5000.00m,
                 Type = TransactionType.TransferIn,
-                Concept = "Transferencia recibida de Alejandro Silva",
+                Concept = "Comidas y bebidas",
                 Date = new DateTime(2026, 9, 1, 18, 20, 0, DateTimeKind.Utc)
             },
-            // Mohammed Khan (3) -> Alejandro (4) $8,500.00
+            // Mohammed Khan (3) -> Alejandro (4) $8,500.00: Educacion
             new Transaction
             {
                 Id = 14,
@@ -192,7 +192,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 4,
                 Amount = 8500.00m,
                 Type = TransactionType.TransferOut,
-                Concept = "Transferencia enviada a Alejandro Silva",
+                Concept = "Educación",
                 Date = new DateTime(2026, 9, 2, 10, 0, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -202,10 +202,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 3,
                 Amount = 8500.00m,
                 Type = TransactionType.TransferIn,
-                Concept = "Transferencia recibida de Mohammed Khan",
+                Concept = "Educación",
                 Date = new DateTime(2026, 9, 2, 10, 0, 0, DateTimeKind.Utc)
             },
-            // Emmanuel Torres (6) -> Roberto Carlos (2) $6,000.00
+            // Emmanuel Torres (6) -> Roberto Carlos (2) $6,000.00: Transporte
             new Transaction
             {
                 Id = 16,
@@ -213,7 +213,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 2,
                 Amount = 6000.00m,
                 Type = TransactionType.TransferOut,
-                Concept = "Transferencia enviada a Roberto Carlos",
+                Concept = "Transporte",
                 Date = new DateTime(2026, 9, 3, 9, 30, 0, DateTimeKind.Utc)
             },
             new Transaction
@@ -223,7 +223,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 ToAccountId = 6,
                 Amount = 6000.00m,
                 Type = TransactionType.TransferIn,
-                Concept = "Transferencia recibida de Emmanuel Torres",
+                Concept = "Transporte",
                 Date = new DateTime(2026, 9, 3, 9, 30, 0, DateTimeKind.Utc)
             }
         );
