@@ -86,6 +86,7 @@ public class TransactionsController : ControllerBase
     /// </remarks>
     /// <param name="query">Filtros y parámetros de paginación desde la query string.</param>
     [HttpGet("me")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType(typeof(PagedResultDto<TransactionItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

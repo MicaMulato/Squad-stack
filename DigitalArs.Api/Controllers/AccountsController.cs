@@ -30,6 +30,7 @@ public class AccountsController : ControllerBase
     /// <response code="401">Usuario no autenticado.</response>
     /// <response code="404">No se encontró una cuenta asociada al usuario.</response>
     [HttpGet("me")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
