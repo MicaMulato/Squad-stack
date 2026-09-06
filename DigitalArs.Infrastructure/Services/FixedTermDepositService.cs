@@ -12,7 +12,22 @@ public class FixedTermDepositService : IFixedTermDepositService
 {
     private readonly ApplicationDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
-    private const decimal AnnualInterestRate = 19.0m; // 19% TNA
+    /// <summary>
+    /// Escala de tasas nominales anuales (TNA) según el plazo de colocación:
+    /// 30 días -> 19.0% TNA
+    /// 60 días -> 22.0% TNA
+    /// 90 días -> 25.0% TNA
+    /// 180 días -> 30.0% TNA
+    /// 365 días -> 35.0% TNA
+    /// </summary>
+    public static decimal GetInterestRateForDuration(int durationDays)
+    {
+        if (durationDays >= 365) return 35.0m;
+        if (durationDays >= 180) return 30.0m;
+        if (durationDays >= 90) return 25.0m;
+        if (durationDays >= 60) return 22.0m;
+        return 19.0m;
+    }
 
     public FixedTermDepositService(ApplicationDbContext context, IUnitOfWork unitOfWork)
     {
@@ -39,7 +54,8 @@ public class FixedTermDepositService : IFixedTermDepositService
         // 3. Cálculos financieros (19% TNA)
         var now = DateTime.UtcNow;
         var closingDate = now.AddDays(request.DurationDays);
-        var interestEarned = Math.Round(request.Amount * (AnnualInterestRate / 100m / 365m) * request.DurationDays, 2);
+        var interestRate = GetInterestRateForDuration(request.DurationDays);
+        var interestEarned = Math.Round(request.Amount * (interestRate / 100m / 365m) * request.DurationDays, 2);
         var finalAmount = request.Amount + interestEarned;
 
         // 4. Débito de saldo
@@ -50,7 +66,7 @@ public class FixedTermDepositService : IFixedTermDepositService
         {
             AccountId = account.Id,
             Amount = request.Amount,
-            InterestRate = AnnualInterestRate,
+            InterestRate = interestRate,
             DurationDays = request.DurationDays,
             CreationDate = now,
             ClosingDate = closingDate,
@@ -67,7 +83,7 @@ public class FixedTermDepositService : IFixedTermDepositService
             AccountId = account.Id,
             Amount = request.Amount,
             Type = TransactionType.FixedDeposit,
-            Concept = $"Constitución de Plazo Fijo ({request.DurationDays} días @ {AnnualInterestRate}% TNA)",
+            Concept = $"Constitución de Plazo Fijo ({request.DurationDays} días @ {interestRate}% TNA)",
             Date = now
         };
 
@@ -123,14 +139,15 @@ public class FixedTermDepositService : IFixedTermDepositService
 
     public SimulateFixedTermDepositResponse Simulate(SimulateFixedTermDepositRequest request)
     {
-        var interestEarned = Math.Round(request.Amount * (AnnualInterestRate / 100m / 365m) * request.DurationDays, 2);
+        var interestRate = GetInterestRateForDuration(request.DurationDays);
+        var interestEarned = Math.Round(request.Amount * (interestRate / 100m / 365m) * request.DurationDays, 2);
         var finalAmount = request.Amount + interestEarned;
         var estimatedClosingDate = DateTime.UtcNow.AddDays(request.DurationDays);
 
         return new SimulateFixedTermDepositResponse
         {
             Amount = request.Amount,
-            InterestRate = AnnualInterestRate,
+            InterestRate = interestRate,
             DurationDays = request.DurationDays,
             InterestEarned = interestEarned,
             FinalAmount = finalAmount,
