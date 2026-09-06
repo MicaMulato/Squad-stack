@@ -51,7 +51,7 @@ public class TransactionsController : ControllerBase
         try
         {
             var result = await _transactionService.TransferAsync(
-                userId, dto.DestinationAccountId, dto.Amount);
+                userId, dto.DestinationAccountId, dto.Amount, dto.Concept);
             return Ok(result);
         }
         catch (ArgumentException ex)

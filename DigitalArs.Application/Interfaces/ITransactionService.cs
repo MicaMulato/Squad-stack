@@ -15,7 +15,8 @@ public interface ITransactionService
     /// <param name="sourceUserId">ID del usuario que origina la transferencia.</param>
     /// <param name="destinationAccountId">ID de la cuenta que recibirá los fondos.</param>
     /// <param name="amount">Monto a transferir. Debe ser mayor a 0.</param>
-    Task<TransferResponseDto> TransferAsync(int sourceUserId, int destinationAccountId, decimal amount);
+    /// <param name="concept">Motivo o concepto de la transferencia.</param>
+    Task<TransferResponseDto> TransferAsync(int sourceUserId, int destinationAccountId, decimal amount, string? concept = null);
 
     /// <summary>
     /// Devuelve el historial de transacciones de la cuenta del usuario, paginado y filtrado.
