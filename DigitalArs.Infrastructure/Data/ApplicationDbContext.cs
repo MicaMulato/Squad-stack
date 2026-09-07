@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, int>
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<FixedTermDeposit> FixedTermDeposits => Set<FixedTermDeposit>();
+    public DbSet<Card> Cards => Set<Card>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

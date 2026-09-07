@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
@@ -29,7 +29,7 @@ namespace DigitalArs
             builder.Services.AddControllers();
 
             // ============================================================
-            // Configuración de CORS (HU-20)
+            // ConfiguraciÃ³n de CORS (HU-20)
             // ============================================================
             const string corsPolicyName = "AllowFrontend";
             var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -56,7 +56,7 @@ namespace DigitalArs
                 {
                     Title = "DigitalArs API - Billetera Virtual",
                     Version = "v1",
-                    Description = "API REST de DigitalArs para gestión de usuarios, cuentas bancarias, depósitos y transferencias monetarias.",
+                    Description = "API REST de DigitalArs para gestiÃ³n de usuarios, cuentas bancarias, depÃ³sitos y transferencias monetarias.",
                     Contact = new OpenApiContact
                     {
                         Name = "Equipo DigitalArs",
@@ -64,7 +64,7 @@ namespace DigitalArs
                     }
                 });
 
-                // Configuración de esquema Bearer JWT para el botón Authorize (HU-19)
+                // ConfiguraciÃ³n de esquema Bearer JWT para el botÃ³n Authorize (HU-19)
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -80,7 +80,7 @@ namespace DigitalArs
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
                 });
 
-                // Incluir documentación XML de la API
+                // Incluir documentaciÃ³n XML de la API
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 if (File.Exists(xmlPath))
@@ -96,7 +96,7 @@ namespace DigitalArs
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Identity — habilita UserManager<User> / RoleManager<Role>
+            // Identity â€” habilita UserManager<User> / RoleManager<Role>
             builder.Services.AddIdentity<User, Role>(options =>
             {
                 // Config minima para desarrollo, ajustar cuando la situacion lo requiera
@@ -157,13 +157,13 @@ namespace DigitalArs
                 .Build();
             });
 
-            // Servicio de hashing de contraseñas
+            // Servicio de hashing de contraseÃ±as
             builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 
             //Mapea "JwtSettings" del appsettings.json a la clase JwtSettings
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-            // Token Generator y Servicio de Autenticación
+            // Token Generator y Servicio de AutenticaciÃ³n
             builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
             builder.Services.AddScoped<IAuthService, AuthService>();
 
@@ -174,10 +174,10 @@ namespace DigitalArs
             // ============================================================
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddApplication(); // ← registra Mapster + FluentValidation
+            builder.Services.AddApplication(); // â† registra Mapster + FluentValidation
 
             // ============================================================
-            // Servicios de aplicación
+            // Servicios de aplicaciÃ³n
             // ============================================================
             builder.Services.Configure<DigitalArs.Application.Settings.DepositSettings>(
                 builder.Configuration.GetSection("DepositSettings"));
@@ -221,7 +221,7 @@ namespace DigitalArs
 
             app.UseHttpsRedirection();
 
-            // CORS (HU-20) — debe ejecutarse antes de UseAuthentication y UseAuthorization
+            // CORS (HU-20) â€” debe ejecutarse antes de UseAuthentication y UseAuthorization
             app.UseCors(corsPolicyName);
 
             // UseAuthentication SIEMPRE antes de UseAuthorization.
