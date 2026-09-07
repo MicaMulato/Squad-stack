@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
@@ -19,8 +19,6 @@ public static class DependencyInjection
         var assembly = Assembly.GetExecutingAssembly();
 
         // === Mapster ===
-        // Escanea el ensamblado en busca de clases IRegister (MappingRegister) y
-        // arma una configuracion global reutilizable, registrada como singleton.
         var mapsterConfig = TypeAdapterConfig.GlobalSettings;
         mapsterConfig.Scan(assembly);
         services.AddSingleton(mapsterConfig);
@@ -28,12 +26,11 @@ public static class DependencyInjection
 
         // === FluentValidation ===
         services.AddFluentValidationAutoValidation();
-        // Requiere el paquete FluentValidation.AspNetCore
-        // Registra todos los AbstractValidator<T> del ensamblado.
         services.AddValidatorsFromAssembly(assembly);
 
         // === Application Services ===
         services.AddScoped<Interfaces.IUserService, Services.UserService>();
+        services.AddScoped<Interfaces.IAuthService, Services.AuthService>();
 
         return services;
     }
