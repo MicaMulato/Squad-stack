@@ -1,22 +1,17 @@
-using System.Reflection;
-using System.Text;
-using DigitalArs.Api.Middlewares;
+﻿using DigitalArs.Api.Middlewares;
 using DigitalArs.Application;
-using DigitalArs.Application.Interfaces;
-using DigitalArs.Application.Services;
-using DigitalArs.Domain.Entities;
+using DigitalArs.Infrastructure;
 using DigitalArs.Infrastructure.Data;
-using DigitalArs.Infrastructure.Repositories;
 using DigitalArs.Infrastructure.Security;
-using DigitalArs.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Reflection;
+using System.Text;
 
-namespace DigitalArs
+namespace DigitalArs.Api
 {
     public class Program
     {
@@ -24,16 +19,19 @@ namespace DigitalArs
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            // ============================================================
+            // Controladores
+            // ============================================================
             builder.Services.AddControllers();
 
             // ============================================================
             // Configuración de CORS (HU-20)
             // ============================================================
-            const string corsPolicyName = "AllowFrontend";
-            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                ?? new[] { "http://localhost:5173" };
+            var corsPolicyName = "AllowFrontendDev";
+            var allowedOrigins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>()
+                ?? new[] { "http://localhost:5173", "http://localhost:3000" };
 
             builder.Services.AddCors(options =>
             {
@@ -45,21 +43,21 @@ namespace DigitalArs
                           .AllowCredentials();
                 });
             });
-            
+
             // ============================================================
-            // Swagger / OpenAPI (HU-19)
+            // OpenAPI / Swagger con soporte JWT Bearer (HU-19)
             // ============================================================
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "DigitalArs API - Billetera Virtual",
+                    Title = "DigitalArs API",
                     Version = "v1",
-                    Description = "API REST de DigitalArs para gestión de usuarios, cuentas bancarias, depósitos y transferencias monetarias.",
+                    Description = "API REST de billetera virtual - Squad Stack (Alkymer)",
                     Contact = new OpenApiContact
                     {
-                        Name = "Equipo DigitalArs",
+                        Name = "Squad Stack Team",
                         Url = new Uri("https://github.com/MicaMulato/Squad-stack")
                     }
                 });
@@ -91,21 +89,14 @@ namespace DigitalArs
             builder.Services.AddOpenApi();
 
             // ============================================================
-            // DbContext
+            // Inyección de Dependencias por Capas (Clean Architecture)
             // ============================================================
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration);
 
-            // Identity — habilita UserManager<User> / RoleManager<Role>
-            builder.Services.AddIdentity<User, Role>(options =>
-            {
-                // Config minima para desarrollo, ajustar cuando la situacion lo requiera
-                options.Password.RequireNonAlphanumeric = false;
-            })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-            //Configuracion de JWT
+            // ============================================================
+            // Autenticación JWT y Autorización
+            // ============================================================
             var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
             var secretKey = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
 
@@ -149,44 +140,13 @@ namespace DigitalArs
                 };
             });
 
-            //[Authorize] por defecto
+            // [Authorize] por defecto en toda la API
             builder.Services.AddAuthorization(options =>
             {
                 options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
+                    .RequireAuthenticatedUser()
+                    .Build();
             });
-
-            // Servicio de hashing de contraseñas
-            builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
-
-            //Mapea "JwtSettings" del appsettings.json a la clase JwtSettings
-            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
-            // Token Generator y Servicio de Autenticación
-            builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
-
-            // ============================================================
-            // Repository generico + Unit of Work
-            // (solo para entidades que heredan BaseEntity: Account, Transaction, etc.
-            //  User y Role se manejan con UserManager/RoleManager, no por aca)
-            // ============================================================
-            builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddApplication(); // ← registra Mapster + FluentValidation
-
-            // ============================================================
-            // Servicios de aplicación
-            // ============================================================
-            builder.Services.Configure<DigitalArs.Application.Settings.DepositSettings>(
-                builder.Configuration.GetSection("DepositSettings"));
-            builder.Services.AddScoped<DigitalArs.Application.Interfaces.IAccountService,
-                DigitalArs.Infrastructure.Services.AccountService>();
-            builder.Services.AddScoped<DigitalArs.Application.Interfaces.ITransactionService,
-                DigitalArs.Infrastructure.Services.TransactionService>();
-            builder.Services.AddScoped<DigitalArs.Application.Interfaces.IFixedTermDepositService,
-                DigitalArs.Infrastructure.Services.FixedTermDepositService>();
 
             var app = builder.Build();
 
@@ -217,7 +177,6 @@ namespace DigitalArs
                 });
                 app.MapOpenApi();
             }
-            
 
             app.UseHttpsRedirection();
 

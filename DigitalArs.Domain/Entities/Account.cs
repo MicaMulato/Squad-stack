@@ -15,4 +15,7 @@ public class Account : BaseEntity
 
     // Propiedad de navegación bidireccional con FixedTermDeposit (HU-33)
     public ICollection<FixedTermDeposit> FixedTermDeposits { get; set; } = new List<FixedTermDeposit>();
+
+    // Propiedad de navegación bidireccional con Card (HU-35)
+    public ICollection<Card> Cards { get; set; } = new List<Card>();
 }
