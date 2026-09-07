@@ -185,6 +185,8 @@ namespace DigitalArs
                 DigitalArs.Infrastructure.Services.AccountService>();
             builder.Services.AddScoped<DigitalArs.Application.Interfaces.ITransactionService,
                 DigitalArs.Infrastructure.Services.TransactionService>();
+            builder.Services.AddScoped<DigitalArs.Application.Interfaces.IFixedTermDepositService,
+                DigitalArs.Infrastructure.Services.FixedTermDepositService>();
 
             var app = builder.Build();
 

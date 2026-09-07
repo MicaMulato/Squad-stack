@@ -4,6 +4,7 @@ using DigitalArs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalArs.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260904230826_AddFixedTermDeposit")]
+    partial class AddFixedTermDeposit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,30 +81,6 @@ namespace DigitalArs.Infrastructure.Migrations
                             IsBlocked = false,
                             Money = 185000.50m,
                             UserId = 3
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsBlocked = false,
-                            Money = 45230.50m,
-                            UserId = 4
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsBlocked = false,
-                            Money = 320000.00m,
-                            UserId = 5
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsBlocked = false,
-                            Money = 410000.00m,
-                            UserId = 6
                         });
                 });
 
@@ -244,173 +223,6 @@ namespace DigitalArs.Infrastructure.Migrations
                     b.HasIndex("ToAccountId");
 
                     b.ToTable("Transactions", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccountId = 4,
-                            Amount = 43730.50m,
-                            Concept = "Depósito inicial de fondos",
-                            Date = new DateTime(2026, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AccountId = 2,
-                            Amount = 239000.00m,
-                            Concept = "Depósito inicial",
-                            Date = new DateTime(2026, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AccountId = 3,
-                            Amount = 193500.50m,
-                            Concept = "Depósito inicial",
-                            Date = new DateTime(2026, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            AccountId = 5,
-                            Amount = 340000.00m,
-                            Concept = "Depósito inicial",
-                            Date = new DateTime(2026, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AccountId = 6,
-                            Amount = 404000.00m,
-                            Concept = "Depósito inicial",
-                            Date = new DateTime(2026, 8, 1, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 6,
-                            AccountId = 4,
-                            Amount = 15000.00m,
-                            Concept = "Transferencia enviada a Roberto Carlos",
-                            Date = new DateTime(2026, 8, 10, 14, 30, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 2,
-                            Type = 3
-                        },
-                        new
-                        {
-                            Id = 7,
-                            AccountId = 2,
-                            Amount = 15000.00m,
-                            Concept = "Transferencia recibida de Alejandro Silva",
-                            Date = new DateTime(2026, 8, 10, 14, 30, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 4,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 8,
-                            AccountId = 5,
-                            Amount = 25000.00m,
-                            Concept = "Transferencia enviada a Alejandro Silva",
-                            Date = new DateTime(2026, 8, 18, 11, 15, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 4,
-                            Type = 3
-                        },
-                        new
-                        {
-                            Id = 9,
-                            AccountId = 4,
-                            Amount = 25000.00m,
-                            Concept = "Transferencia recibida de Micaela Mulato",
-                            Date = new DateTime(2026, 8, 18, 11, 15, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 5,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 10,
-                            AccountId = 4,
-                            Amount = 12000.00m,
-                            Concept = "Transferencia enviada a Emmanuel Torres",
-                            Date = new DateTime(2026, 8, 25, 16, 45, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 6,
-                            Type = 3
-                        },
-                        new
-                        {
-                            Id = 11,
-                            AccountId = 6,
-                            Amount = 12000.00m,
-                            Concept = "Transferencia recibida de Alejandro Silva",
-                            Date = new DateTime(2026, 8, 25, 16, 45, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 4,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 12,
-                            AccountId = 4,
-                            Amount = 5000.00m,
-                            Concept = "Transferencia enviada a Micaela Mulato",
-                            Date = new DateTime(2026, 9, 1, 18, 20, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 5,
-                            Type = 3
-                        },
-                        new
-                        {
-                            Id = 13,
-                            AccountId = 5,
-                            Amount = 5000.00m,
-                            Concept = "Transferencia recibida de Alejandro Silva",
-                            Date = new DateTime(2026, 9, 1, 18, 20, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 4,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 14,
-                            AccountId = 3,
-                            Amount = 8500.00m,
-                            Concept = "Transferencia enviada a Alejandro Silva",
-                            Date = new DateTime(2026, 9, 2, 10, 0, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 4,
-                            Type = 3
-                        },
-                        new
-                        {
-                            Id = 15,
-                            AccountId = 4,
-                            Amount = 8500.00m,
-                            Concept = "Transferencia recibida de Mohammed Khan",
-                            Date = new DateTime(2026, 9, 2, 10, 0, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 3,
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 16,
-                            AccountId = 6,
-                            Amount = 6000.00m,
-                            Concept = "Transferencia enviada a Roberto Carlos",
-                            Date = new DateTime(2026, 9, 3, 9, 30, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 2,
-                            Type = 3
-                        },
-                        new
-                        {
-                            Id = 17,
-                            AccountId = 2,
-                            Amount = 6000.00m,
-                            Concept = "Transferencia recibida de Emmanuel Torres",
-                            Date = new DateTime(2026, 9, 3, 9, 30, 0, 0, DateTimeKind.Utc),
-                            ToAccountId = 6,
-                            Type = 2
-                        });
                 });
 
             modelBuilder.Entity("DigitalArs.Domain.Entities.User", b =>
@@ -574,69 +386,6 @@ namespace DigitalArs.Infrastructure.Migrations
                             SecurityStamp = "SEED-USER2-SECURITY-STAMP",
                             TwoFactorEnabled = false,
                             UserName = "mokha@gmail.com"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "seed-user4-concurrency",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "alejandro.silva@digitalars.com",
-                            EmailConfirmed = true,
-                            FirstName = "Alejandro",
-                            IsDeleted = false,
-                            LastName = "Silva",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ALEJANDRO.SILVA@DIGITALARS.COM",
-                            NormalizedUserName = "ALEJANDRO.SILVA@DIGITALARS.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIF4BH6BgJcp+Hmu8tYbCiyDyfC8/R3A8lus7ILAex/9qAxhI8YRaq7+ERYrGrRrYg==",
-                            PhoneNumberConfirmed = false,
-                            RoleId = 2,
-                            SecurityStamp = "SEED-USER4-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "alejandro.silva@digitalars.com"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "seed-user5-concurrency",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "micaela.mulato@digitalars.com",
-                            EmailConfirmed = true,
-                            FirstName = "Micaela",
-                            IsDeleted = false,
-                            LastName = "Mulato",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "MICAELA.MULATO@DIGITALARS.COM",
-                            NormalizedUserName = "MICAELA.MULATO@DIGITALARS.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEPlWIfeBvEa2UIgXOAlJgZkhZ9W+6n3zxsEIiVncqS9jY+6qmsMbOL+u+DeaM10S1w==",
-                            PhoneNumberConfirmed = false,
-                            RoleId = 2,
-                            SecurityStamp = "SEED-USER5-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "micaela.mulato@digitalars.com"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "seed-user6-concurrency",
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "emmanuel.torres@digitalars.com",
-                            EmailConfirmed = true,
-                            FirstName = "Emmanuel",
-                            IsDeleted = false,
-                            LastName = "Torres",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "EMMANUEL.TORRES@DIGITALARS.COM",
-                            NormalizedUserName = "EMMANUEL.TORRES@DIGITALARS.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEISvy59LTmpoZ20JI0rhgziQdnw7hg1vq272APTffUCeMWtHb8rAl0V5Src75EltPA==",
-                            PhoneNumberConfirmed = false,
-                            RoleId = 2,
-                            SecurityStamp = "SEED-USER6-SECURITY-STAMP",
-                            TwoFactorEnabled = false,
-                            UserName = "emmanuel.torres@digitalars.com"
                         });
                 });
 
@@ -737,21 +486,6 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             UserId = 3,
-                            RoleId = 2
-                        },
-                        new
-                        {
-                            UserId = 4,
-                            RoleId = 2
-                        },
-                        new
-                        {
-                            UserId = 5,
-                            RoleId = 2
-                        },
-                        new
-                        {
-                            UserId = 6,
                             RoleId = 2
                         });
                 });

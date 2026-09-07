@@ -1,8 +1,9 @@
-namespace DigitalArs.Domain.Enums;
+﻿namespace DigitalArs.Domain.Enums;
 
 public enum TransactionType
 {
     Deposit = 1,
     TransferIn = 2,
-    TransferOut = 3
+    TransferOut = 3,
+    FixedDeposit = 4
 }

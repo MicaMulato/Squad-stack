@@ -1,4 +1,4 @@
-using DigitalArs.Domain.Entities;
+﻿using DigitalArs.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, int>
 
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<FixedTermDeposit> FixedTermDeposits => Set<FixedTermDeposit>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
