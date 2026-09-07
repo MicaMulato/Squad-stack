@@ -23,7 +23,8 @@ public class TransactionService : ITransactionService
     public async Task<TransferResponseDto> TransferAsync(
         int sourceUserId,
         int destinationAccountId,
-        decimal amount)
+        decimal amount,
+        string? concept = null)
     {
         var accountRepo     = _unitOfWork.Repository<Account>();
         var transactionRepo = _unitOfWork.Repository<Transaction>();
@@ -67,13 +68,17 @@ public class TransactionService : ITransactionService
         accountRepo.Update(sourceAccount);
         accountRepo.Update(destAccount);
 
+        var motive = !string.IsNullOrWhiteSpace(concept) ? concept.Trim() : null;
+        var outConcept = motive ?? $"Transferencia enviada a cuenta #{destAccount.Id}";
+        var inConcept = motive != null ? $"Transferencia recibida · {motive}" : $"Transferencia recibida de cuenta #{sourceAccount.Id}";
+
         var transferOut = new Transaction
         {
             AccountId   = sourceAccount.Id,
             ToAccountId = destAccount.Id,
             Amount      = amount,
             Type        = TransactionType.TransferOut,
-            Concept     = $"Transferencia enviada a cuenta #{destAccount.Id}",
+            Concept     = outConcept,
             Date        = transferDate
         };
 
@@ -83,9 +88,10 @@ public class TransactionService : ITransactionService
             ToAccountId = sourceAccount.Id,
             Amount      = amount,
             Type        = TransactionType.TransferIn,
-            Concept     = $"Transferencia recibida de cuenta #{sourceAccount.Id}",
+            Concept     = inConcept,
             Date        = transferDate
         };
+
 
         await transactionRepo.AddAsync(transferOut);
         await transactionRepo.AddAsync(transferIn);
@@ -129,10 +135,20 @@ public class TransactionService : ITransactionService
             query = query.Where(t => t.Type == queryDto.Type.Value);
 
         if (queryDto.DateFrom.HasValue)
-            query = query.Where(t => t.Date >= queryDto.DateFrom.Value);
+        {
+            var minDate = queryDto.DateFrom.Value.TimeOfDay == TimeSpan.Zero
+                ? queryDto.DateFrom.Value.Date.AddHours(-14)
+                : queryDto.DateFrom.Value;
+            query = query.Where(t => t.Date >= minDate);
+        }
 
         if (queryDto.DateTo.HasValue)
-            query = query.Where(t => t.Date <= queryDto.DateTo.Value);
+        {
+            var maxDate = queryDto.DateTo.Value.TimeOfDay == TimeSpan.Zero
+                ? queryDto.DateTo.Value.Date.AddDays(1).AddHours(14)
+                : queryDto.DateTo.Value;
+            query = query.Where(t => t.Date <= maxDate);
+        }
 
         if (queryDto.AmountMin.HasValue)
             query = query.Where(t => t.Amount >= queryDto.AmountMin.Value);

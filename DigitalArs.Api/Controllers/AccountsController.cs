@@ -30,6 +30,7 @@ public class AccountsController : ControllerBase
     /// <response code="401">Usuario no autenticado.</response>
     /// <response code="404">No se encontró una cuenta asociada al usuario.</response>
     [HttpGet("me")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -123,7 +124,7 @@ public class AccountsController : ControllerBase
 
         try
         {
-            var result = await _accountService.DepositAsync(userId, dto.Amount);
+            var result = await _accountService.DepositAsync(userId, dto.Amount, dto.Concept);
             return Ok(result);
         }
         catch (ArgumentException ex)

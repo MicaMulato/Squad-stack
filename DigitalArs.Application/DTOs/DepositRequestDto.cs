@@ -6,4 +6,5 @@ namespace DigitalArs.Application.DTOs;
 public class DepositRequestDto
 {
     public decimal Amount { get; set; }
+    public string? Concept { get; set; }
 }

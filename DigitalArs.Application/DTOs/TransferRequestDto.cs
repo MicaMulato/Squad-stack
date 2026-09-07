@@ -10,4 +10,8 @@ public class TransferRequestDto
 
     /// <summary>Monto a transferir. Debe ser mayor a 0.</summary>
     public decimal Amount { get; set; }
+
+    /// <summary>Motivo o concepto de la transferencia.</summary>
+    public string? Concept { get; set; }
 }
+

@@ -4,6 +4,7 @@ using DigitalArs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalArs.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260904051533_SeedUsersAndMovements")]
+    partial class SeedUsersAndMovements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,54 +106,6 @@ namespace DigitalArs.Infrastructure.Migrations
                             Money = 410000.00m,
                             UserId = 6
                         });
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.FixedTermDeposit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("ClosingDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreationDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int>("DurationDays")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("FinalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("InterestEarned")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("InterestRate")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("FixedTermDeposits", (string)null);
                 });
 
             modelBuilder.Entity("DigitalArs.Domain.Entities.Role", b =>
@@ -786,17 +741,6 @@ namespace DigitalArs.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DigitalArs.Domain.Entities.FixedTermDeposit", b =>
-                {
-                    b.HasOne("DigitalArs.Domain.Entities.Account", "Account")
-                        .WithMany("FixedTermDeposits")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
             modelBuilder.Entity("DigitalArs.Domain.Entities.Transaction", b =>
                 {
                     b.HasOne("DigitalArs.Domain.Entities.Account", "Account")
@@ -879,8 +823,6 @@ namespace DigitalArs.Infrastructure.Migrations
 
             modelBuilder.Entity("DigitalArs.Domain.Entities.Account", b =>
                 {
-                    b.Navigation("FixedTermDeposits");
-
                     b.Navigation("Transactions");
                 });
 

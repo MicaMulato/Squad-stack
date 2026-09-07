@@ -13,8 +13,9 @@ public interface IAccountService
     /// </summary>
     /// <param name="userId">ID del usuario dueño de la cuenta.</param>
     /// <param name="amount">Monto a depositar. Debe ser mayor a 0 y no superar el límite configurado.</param>
+    /// <param name="concept">Motivo o concepto del depósito (opcional).</param>
     /// <returns>DTO con el nuevo saldo, el ID de la transacción y la fecha.</returns>
-    Task<DepositResponseDto> DepositAsync(int userId, decimal amount);
+    Task<DepositResponseDto> DepositAsync(int userId, decimal amount, string? concept = null);
 
     /// <summary>
     /// Consulta los datos y saldo de la cuenta del usuario (HU-14).
