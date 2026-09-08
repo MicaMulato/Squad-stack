@@ -32,6 +32,7 @@ public class UserService : IUserService
     {
         var usersQuery = _userManager.Users
             .Include(u => u.Role)
+            .Include(u => u.Account)
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.Name))

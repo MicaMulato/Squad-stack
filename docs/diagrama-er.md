@@ -1,8 +1,8 @@
-﻿# Diagrama Entidad-Relación — Billetera Virtual DigitalArs
+# Diagrama Entidad-Relación — Billetera Virtual DigitalArs
 
 > **Documento:** Especificación del Modelo de Datos Relacional  
 > **Sistema:** DigitalArs API (.NET 10 + Entity Framework Core 10 + SQL Server)  
-> **Versión:** 2.0 (Actualizado al Sprint 2 con Entidades `Card` y `FixedTermDeposit`)  
+> **Versión:** 2.1 (Actualizado con Identificadores Bancarios Interoperables: `Cvu` y `Alias`, más `Card` y `FixedTermDeposit`)  
 
 ---
 
@@ -49,6 +49,8 @@ erDiagram
         int Id PK "Clave primaria autoincremental"
         int UserId FK,UK "Clave foránea única 1:1 con User"
         decimal Money "Saldo disponible con precisión decimal(18,2)"
+        string Cvu UK "CVU único e inmutable de 22 dígitos (HU-31)"
+        string Alias UK "Alias bancario alfanumérico único editable (HU-31)"
         bool IsBlocked "Estado de bloqueo preventivo de cuenta"
         datetime CreatedAt "Fecha de apertura de cuenta UTC"
     }
@@ -98,13 +100,16 @@ erDiagram
 - Hereda de `IdentityUser<int>` provisto por ASP.NET Core Identity.
 - Se implementó un patrón de **baja lógica (*Soft Delete*)** mediante la propiedad `IsDeleted`.
 - Índice no agrupado único sobre `NormalizedEmail` e índice sobre `IsDeleted` para acelerar consultas de usuarios activos.
+- En la capa de aplicación, la creación y edición validan la unicidad del email incluso contra registros con baja lógica (`IgnoreQueryFilters`), impidiendo colisiones en base de datos.
 
 ### 2.2. `Role` (Roles y Permisos)
 - Hereda de `IdentityRole<int>`.
 - Soporta roles principales: `Admin` (Id: 1) y `User` (Id: 2).
 
-### 2.3. `Account` (Cuenta Monetaria)
+### 2.3. `Account` (Cuenta Monetaria e Identificadores Bancarios)
 - Relación **1 a 1** estricta con `User`. Cada usuario registrado dispone exactamente de una cuenta monetaria en pesos (ARS).
+- **`Cvu`**: Clave Virtual Uniforme de **22 dígitos numéricos**. Es única a nivel de base de datos (`IX_Accounts_Cvu`) e inmutable una vez asignada al crearse la cuenta (HU-31).
+- **`Alias`**: Identificador alfanumérico legible único (`IX_Accounts_Alias`, formato `palabra1.palabra2.ars`) de hasta 50 caracteres. Es editable por el usuario desde su perfil con validación de unicidad en tiempo real.
 - La columna `Money` almacena el saldo con tipo de datos `decimal(18,2)` para prevenir desbordes o imprecisiones de punto flotante.
 - Incluye la propiedad `IsBlocked` para inhabilitar operaciones de débito o transferencia si se detecta actividad sospechosa.
 

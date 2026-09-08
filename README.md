@@ -1,4 +1,4 @@
-﻿# DigitalArs — Billetera Virtual (Backend API)
+# DigitalArs — Billetera Virtual (Backend API)
 
 > **Proyecto:** Billetera Virtual / Digital Wallet  
 > **Programa:** Aceleración Técnica en **Alchemie Acceleration Tech**  
@@ -9,7 +9,7 @@
 
 ## 1. Descripción del Proyecto
 
-**DigitalArs** es una solución fintech integral construida con arquitectura limpia (*Clean Architecture*) y estándares empresariales. Proporciona una API RESTful de alto rendimiento para la gestión financiera segura de cuentas bancarias virtuales, procesamiento de transferencias atómicas entre usuarios, depósitos con comprobante, simulación y constitución de plazos fijos de inversión, emisión y administración de tarjetas (virtuales y físicas), y un panel de control administrativo con control de accesos basado en roles (*RBAC*).
+**DigitalArs** es una solución fintech integral construida con arquitectura limpia (*Clean Architecture*) y estándares empresariales. Proporciona una API RESTful de alto rendimiento para la gestión financiera segura de cuentas bancarias virtuales, procesamiento de transferencias atómicas entre usuarios (por CVU, Alias o Cuenta), depósitos con comprobante, simulación y constitución de plazos fijos de inversión, emisión y administración de tarjetas (virtuales y físicas), y un panel de control administrativo con control de accesos basado en roles (*RBAC*).
 
 ---
 
@@ -44,6 +44,7 @@ La configuración de servicios se encuentra desacoplada mediante métodos de ext
 | **Seguridad e Identidad** | ASP.NET Core Identity | `10.0` | Gestión de usuarios, roles, claims y hash seguro de contraseñas |
 | **Autenticación** | JWT (JSON Web Tokens) | `Bearer` | Tokens firmados criptográficamente con `HMAC-SHA256` |
 | **Documentación API** | OpenAPI / Swagger UI | `Swashbuckle 7.0` | Explorador interactivo y documentación viva de endpoints |
+| **Colección Postman** | Postman Collection v2.1 | `2.1` | Colección completa con variables de entorno y auto-guardado de token |
 | **Testing Automatizado** | xUnit & Moq | `2.9+` | Suite de pruebas unitarias y mocks para lógica de servicios |
 
 ---
@@ -53,7 +54,7 @@ La configuración de servicios se encuentra desacoplada mediante métodos de ext
 Antes de clonar y ejecutar el proyecto, asegúrese de tener instalado:
 1. **[.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)** (o superior).
 2. **Microsoft SQL Server** (LocalDB incluido con Visual Studio, SQL Server Express o instancia de SQL Server en Docker).
-3. **IDE / Editor:** Visual Studio 2022+, VS Code (con C# Dev Kit), Rider o Kiro IDE.
+3. **IDE / Editor:** Visual Studio 2022+, VS Code (con C# Dev Kit), Rider o Antigravity IDE.
 4. **Herramienta EF Core CLI:**
    ```bash
    dotnet tool install --global dotnet-ef
@@ -107,14 +108,14 @@ dotnet run --project DigitalArs.Api
 ```
 
 La API se iniciará de forma predeterminada en:
-- **API URL:** `http://localhost:5065` o `https://localhost:7065`
+- **API URL:** `http://localhost:5065` o `https://localhost:7142`
 - **Swagger UI:** `http://localhost:5065/swagger`
 
 ---
 
 ## 6. Credenciales de Prueba (Data Seeding)
 
-La base de datos se inicializa automáticamente con usuarios, cuentas activas, saldos e historial de movimientos:
+La base de datos se inicializa automáticamente con usuarios, cuentas activas, CVU/Alias generados, saldos e historial de movimientos:
 
 | Rol | Nombre | Email | Contraseña | Saldo Inicial | Estado |
 | :--- | :--- | :--- | :--- | :---: | :---: |
@@ -125,13 +126,9 @@ La base de datos se inicializa automáticamente con usuarios, cuentas activas, s
 | **User** | Micaela Mulato | `micaela.mulato@digitalars.com` | `User123!` | $320.000,00 | Activo |
 | **User** | Emmanuel Torres | `emmanuel.torres@digitalars.com` | `User123!` | $410.000,00 | Activo |
 
-> **Seguridad:** Todas las contraseñas están procesadas con el algoritmo `PBKDF2` con salt criptográfico mediante `PasswordHasher<User>` de ASP.NET Core Identity.
-
 ---
 
 ## 7. Diagrama Entidad-Relación (ER Diagram)
-
-El modelo de datos relacional modela integralmente el ciclo financiero de la billetera:
 
 ```mermaid
 erDiagram
@@ -168,6 +165,8 @@ erDiagram
         int Id PK
         int UserId FK,UK
         decimal Money
+        string Cvu UK
+        string Alias UK
         bool IsBlocked
         datetime CreatedAt
     }
@@ -211,59 +210,62 @@ erDiagram
 
 ---
 
-## 8. Catálogo de Módulos y Endpoints Principales
+## 8. Catálogo de Módulos y Endpoints de la API
 
 ### 8.1. Autenticación (`/api/auth`)
 - `POST /api/auth/login`: Autentica credenciales y emite token JWT con claims de usuario y rol.
-- `POST /api/auth/register`: Registro de nuevos usuarios con creación automática de su `Account` bancaria inicial.
 
-### 8.2. Cuentas y Saldo (`/api/accounts`)
-- `GET /api/accounts/balance`: Consulta de saldo disponible en tiempo real para el usuario autenticado.
-- `POST /api/accounts/deposit`: Acreditación de fondos propios en cuenta con registro de auditoría.
-- `GET /api/accounts/me`: Información detallada de la cuenta y titular.
+### 8.2. Cuentas y Datos Bancarios (`/api/accounts`)
+- `GET /api/accounts/me`: Información detallada de la cuenta bancaria del usuario (saldo, CVU de 22 dígitos, Alias y estado).
+- `PUT /api/accounts/me/alias`: Actualización del Alias único de la cuenta.
+- `GET /api/accounts/lookup?query={cvuOrAlias}`: Búsqueda y validación de destinatario en tiempo real por CVU o Alias.
+- `POST /api/accounts/deposit`: Acreditación de fondos propios en cuenta.
+- `GET /api/accounts/{id}`: Detalle de una cuenta por ID (Solo Administradores).
 
 ### 8.3. Transferencias y Transacciones (`/api/transactions`)
-- `POST /api/transactions/transfer`: Transferencia atómica entre cuentas con verificación de saldo, cuenta activa y generación de dos asientos contables vinculados.
-- `GET /api/transactions/history`: Historial paginado con filtros por fecha, tipo de operación y concepto.
-- `GET /api/transactions/{id}`: Detalle de una transacción específica para emisión de comprobante.
+- `POST /api/transactions/transfer`: Transferencia atómica entre cuentas con verificación de saldo, cuenta activa y generación de asientos dobles (débito y crédito).
+- `GET /api/transactions/me`: Historial paginado de movimientos con filtros por tipo, rango de fechas y montos.
 
-### 8.4. Inversiones a Plazo Fijo (`/api/fixedterm`)
-- `POST /api/fixedterm`: Constitución de plazo fijo debitando saldo disponible según TNA (Tasa Nominal Anual) y plazo seleccionado (mínimo 30 días).
-- `GET /api/fixedterm`: Listado de plazos fijos del usuario (activos, finalizados y cancelados).
-- `POST /api/fixedterm/{id}/cancel`: Cancelación anticipada o cierre de plazo fijo con reintegro de fondos a la cuenta.
+### 8.4. Inversiones a Plazo Fijo (`/api/fixed-deposits`)
+- `POST /api/fixed-deposits/simulate`: Simulador público de rendimiento según capital y días (sin comprometer saldo).
+- `POST /api/fixed-deposits`: Constitución de plazo fijo debitando saldo disponible según TNA (Tasa Nominal Anual) pactada.
+- `GET /api/fixed-deposits/me`: Listado de plazos fijos del usuario (activos, finalizados y cancelados).
 
 ### 8.5. Tarjetas Virtuales y Físicas (`/api/cards`)
-- `GET /api/cards`: Obtiene todas las tarjetas asociadas a la cuenta del usuario.
-- `POST /api/cards`: Emisión instantánea de nueva tarjeta (Virtual o Física) con numeración formateada y CVV seguro.
-- `POST /api/cards/{id}/toggle-freeze`: Congelamiento y descongelamiento temporal inmediato de tarjeta.
-- `DELETE /api/cards/{id}`: Baja lógica / cancelación de tarjeta.
+- `POST /api/cards/virtual`: Emisión instantánea de tarjeta de débito virtual.
+- `GET /api/cards/me`: Listado de tarjetas activas asociadas a la cuenta (datos enmascarados).
+- `GET /api/cards/{id}/reveal`: Revelación segura de datos sensibles (PAN completo de 16 dígitos y código CVV).
+- `PATCH /api/cards/{id}/freeze`: Congelamiento y descongelamiento temporal de tarjeta.
+- `DELETE /api/cards/{id}`: Baja definitiva de tarjeta.
 
-### 8.6. Administración y Auditoría (`/api/users` & `/api/admin`)
-- `GET /api/users`: Listado paginado de usuarios para administradores (`Role: Admin`).
-- `PUT /api/users/{id}/block`: Bloqueo/desbloqueo de cuentas por seguridad o mora.
-- `PUT /api/users/{id}/role`: Asignación y elevación de roles de usuario.
-- `DELETE /api/users/{id}`: Baja lógica (*soft delete*) de usuarios del sistema.
+### 8.6. Administración y Gestión de Usuarios (`/api/users`)
+- `GET /api/users/me`: Consulta de perfil propio.
+- `PUT /api/users/me`: Actualización de perfil propio y cambio de contraseña.
+- `GET /api/users`: Listado paginado de usuarios con saldo de cuenta y roles asignados (Solo Administradores).
+- `GET /api/users/{id}`: Información detallada de un usuario por ID (Solo Administradores).
+- `POST /api/users`: Alta de nuevo usuario con asignación de cuenta, CVU, Alias y saldo inicial (Solo Administradores).
+- `PUT /api/users/{id}`: Modificación de datos personales, correo o rol de un usuario (Solo Administradores).
+- `DELETE /api/users/{id}`: Baja lógica (*Soft Delete*) y bloqueo de usuario (Solo Administradores).
 
 ---
 
-## 9. Pruebas Automatizadas
+## 9. Colección de Postman
 
-El proyecto cuenta con un proyecto dedicado de pruebas unitarias (`DigitalArs.UnitTests`) que valida la lógica de negocio central (depósitos, transferencias sin saldo suficiente, validaciones de tarjetas, cálculo de intereses en plazos fijos).
+El proyecto incluye una colección completa y su entorno de variables en `docs/postman/`:
+- **Colección:** `docs/postman/DigitalArs.postman_collection.json`
+- **Entorno:** `docs/postman/DigitalArs.postman_environment.json`
 
-Para ejecutar toda la suite de tests:
+La colección cuenta con un script de prueba en los endpoints de Login que guarda automáticamente el `token` JWT en el entorno, permitiendo ejecutar cualquier endpoint autenticado sin configuración manual.
+
+---
+
+## 10. Pruebas Automatizadas
+
+Para ejecutar toda la suite de pruebas unitarias:
 
 ```bash
 dotnet test
 ```
-
----
-
-## 10. Seguridad y Buenas Prácticas
-
-- **Sin Secretos en Código:** La configuración sensible utiliza cadenas parametrizadas en `appsettings.json`, variables de entorno y soporte para `dotnet user-secrets`.
-- **Protección CORS:** Configuración estricta de orígenes permitidos para consumo seguro desde la SPA de React (`http://localhost:5173`).
-- **Consultas Optimizadas:** Uso sistemático de `.AsNoTracking()` en endpoints de lectura, índices no agrupados sobre `AccountId`, `Date`, `UserId` y `Email`.
-- **Integridad Transaccional:** Transacciones de base de datos con rollback automático ante excepciones en transferencias de fondos y débitos de plazos fijos.
 
 ---
 
