@@ -4,6 +4,7 @@ using DigitalArs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalArs.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260908004436_AddNotifications")]
+    partial class AddNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,20 +33,10 @@ namespace DigitalArs.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Alias")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Cvu")
-                        .IsRequired()
-                        .HasMaxLength(22)
-                        .HasColumnType("nvarchar(22)");
 
                     b.Property<bool>("IsBlocked")
                         .ValueGeneratedOnAdd()
@@ -59,12 +52,6 @@ namespace DigitalArs.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Alias")
-                        .IsUnique();
-
-                    b.HasIndex("Cvu")
-                        .IsUnique();
-
                     b.HasIndex("UserId")
                         .IsUnique();
 
@@ -74,9 +61,7 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            Alias = "admin.digital.ars",
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Cvu = "0000003100010000000001",
                             IsBlocked = false,
                             Money = 500000.00m,
                             UserId = 1
@@ -84,9 +69,7 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             Id = 2,
-                            Alias = "roberto.carlos.ars",
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Cvu = "0000003100010000000002",
                             IsBlocked = false,
                             Money = 260000.00m,
                             UserId = 2
@@ -94,9 +77,7 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             Id = 3,
-                            Alias = "mohammed.khan.ars",
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Cvu = "0000003100010000000003",
                             IsBlocked = false,
                             Money = 185000.50m,
                             UserId = 3
@@ -104,9 +85,7 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             Id = 4,
-                            Alias = "alejandro.silva.ars",
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Cvu = "0000003100010000000004",
                             IsBlocked = false,
                             Money = 45230.50m,
                             UserId = 4
@@ -114,9 +93,7 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             Id = 5,
-                            Alias = "micaela.mulato.ars",
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Cvu = "0000003100010000000005",
                             IsBlocked = false,
                             Money = 320000.00m,
                             UserId = 5
@@ -124,9 +101,7 @@ namespace DigitalArs.Infrastructure.Migrations
                         new
                         {
                             Id = 6,
-                            Alias = "emmanuel.torres.ars",
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Cvu = "0000003100010000000006",
                             IsBlocked = false,
                             Money = 410000.00m,
                             UserId = 6

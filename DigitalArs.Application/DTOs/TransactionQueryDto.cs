@@ -17,11 +17,18 @@ public class TransactionQueryDto
     /// <summary>Filtro opcional por tipo de transacción (1=Deposit, 2=TransferIn, 3=TransferOut).</summary>
     public TransactionType? Type { get; set; }
 
+    /// <summary>Filtro por agrupación: 'income' (Deposit + TransferIn) o 'expense' (TransferOut + FixedDeposit + Payment).</summary>
+    public string? MovementType { get; set; }
+
+    /// <summary>Filtro opcional por búsqueda de concepto.</summary>
+    public string? Search { get; set; }
+
     /// <summary>Filtro opcional: fecha mínima (inclusive).</summary>
     public DateTime? DateFrom { get; set; }
 
     /// <summary>Filtro opcional: fecha máxima (inclusive).</summary>
     public DateTime? DateTo { get; set; }
+
 
     /// <summary>Filtro opcional: monto mínimo (inclusive).</summary>
     public decimal? AmountMin { get; set; }

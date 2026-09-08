@@ -1,4 +1,4 @@
-﻿using DigitalArs.Domain.Entities;
+using DigitalArs.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +16,10 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, int>
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<FixedTermDeposit> FixedTermDeposits => Set<FixedTermDeposit>();
     public DbSet<Card> Cards => Set<Card>();
+    public DbSet<ServiceProvider> ServiceProviders => Set<ServiceProvider>();
+    public DbSet<ServicePayment> ServicePayments => Set<ServicePayment>();
+    public DbSet<MoneyReserve> MoneyReserves => Set<MoneyReserve>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

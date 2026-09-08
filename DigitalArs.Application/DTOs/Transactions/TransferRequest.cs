@@ -12,4 +12,7 @@ public record TransferRequest
 
     /// <summary>Concepto o descripcion opcional de la transferencia.</summary>
     public string? Concept { get; init; }
+
+    /// <summary>ID opcional de la reserva de dinero de la que se debitan los fondos.</summary>
+    public int? ReserveId { get; init; }
 }

@@ -1,4 +1,4 @@
-﻿namespace DigitalArs.Domain.Entities;
+namespace DigitalArs.Domain.Entities;
 
 public class Account : BaseEntity
 {
@@ -24,4 +24,10 @@ public class Account : BaseEntity
 
     // Propiedad de navegación bidireccional con Card (HU-35)
     public ICollection<Card> Cards { get; set; } = new List<Card>();
+
+    // Propiedad de navegación bidireccional con MoneyReserve
+    public ICollection<MoneyReserve> Reserves { get; set; } = new List<MoneyReserve>();
+
+    // Propiedad de navegación bidireccional con ServicePayment
+    public ICollection<ServicePayment> ServicePayments { get; set; } = new List<ServicePayment>();
 }

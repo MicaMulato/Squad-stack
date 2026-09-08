@@ -28,7 +28,7 @@ DigitalArs.slnx
 
 ### Inyección de Dependencias Modular
 La configuración de servicios se encuentra desacoplada mediante métodos de extensión:
-- `services.AddApplication()`: Registra validadores y configuraciones de aplicación.
+- `services.AddApplication()`: Registra validadores FluentValidation y configuraciones de aplicación.
 - `services.AddInfrastructure(configuration)`: Registra `ApplicationDbContext`, Identity, Repositorios genéricos, Unit of Work y servicios de infraestructura (`AccountService`, `TransactionService`, `FixedTermDepositService`, `CardService`, `JwtTokenGenerator`).
 
 ---
@@ -207,6 +207,9 @@ erDiagram
         datetime CreatedAt
     }
 ```
+
+> 📄 **Documentación Detallada del Modelo Relacional:**  
+> Consulta el desglose completo de entidades, tipos, índices y restricciones en [docs/diagrama-er.md](docs/diagrama-er.md).
 
 ---
 
