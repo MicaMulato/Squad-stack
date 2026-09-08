@@ -95,9 +95,19 @@ public class UserService : IUserService
     public async Task<UserResponse> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = request.Email.Trim();
-        var existingUser = await _userManager.FindByEmailAsync(normalizedEmail);
+
+        // Buscar incluyendo usuarios dados de baja lógica (IgnoreQueryFilters)
+        // para evitar la violación de índice único en base de datos
+        var existingUser = await _userManager.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+
         if (existingUser != null)
         {
+            if (existingUser.IsDeleted)
+            {
+                throw new ConflictException($"El email '{normalizedEmail}' pertenece a un usuario inactivo dado de baja. No se puede reutilizar este email.");
+            }
             throw new ConflictException($"El email '{normalizedEmail}' ya se encuentra registrado.");
         }
 
@@ -194,8 +204,11 @@ public class UserService : IUserService
         var normalizedEmail = request.Email.Trim();
         if (!string.Equals(user.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase))
         {
-            var existingWithEmail = await _userManager.FindByEmailAsync(normalizedEmail);
-            if (existingWithEmail != null && existingWithEmail.Id != id)
+            var existingWithEmail = await _userManager.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Email == normalizedEmail && u.Id != id, cancellationToken);
+
+            if (existingWithEmail != null)
             {
                 throw new ConflictException($"El email '{normalizedEmail}' ya se encuentra registrado por otro usuario.");
             }
