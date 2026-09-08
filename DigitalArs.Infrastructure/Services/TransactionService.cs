@@ -13,10 +13,14 @@ namespace DigitalArs.Infrastructure.Services;
 public class TransactionService : ITransactionService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly INotificationService _notificationService;
 
-    public TransactionService(IUnitOfWork unitOfWork)
+    public TransactionService(
+        IUnitOfWork unitOfWork,
+        INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
+        _notificationService = notificationService;
     }
 
     /// <inheritdoc />
@@ -24,14 +28,16 @@ public class TransactionService : ITransactionService
         int sourceUserId,
         int destinationAccountId,
         decimal amount,
-        string? concept = null)
+        string? concept = null,
+        int? reserveId = null)
     {
         var accountRepo     = _unitOfWork.Repository<Account>();
         var transactionRepo = _unitOfWork.Repository<Transaction>();
 
         // ── 1. Buscar cuenta origen ───────────────────────────────────────────
-        var sourceAccounts = await accountRepo.FindAsync(a => a.UserId == sourceUserId);
-        var sourceAccount  = sourceAccounts.FirstOrDefault();
+        var sourceAccount = await accountRepo.Query()
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(a => a.UserId == sourceUserId);
 
         if (sourceAccount is null)
             throw new KeyNotFoundException(
@@ -53,23 +59,53 @@ public class TransactionService : ITransactionService
             throw new ArgumentException(
                 "No se puede transferir dinero a tu propia cuenta.");
 
-        // ── 4. Validar saldo suficiente ───────────────────────────────────────
-        if (sourceAccount.Money < amount)
-            throw new InvalidOperationException(
-                $"Saldo insuficiente. Disponible: {sourceAccount.Money:N2}, requerido: {amount:N2}.");
+        // ── 4. Validar saldo suficiente (Cuenta o Reserva) ─────────────────────
+        MoneyReserve? reserve = null;
+        if (reserveId.HasValue)
+        {
+            reserve = await _unitOfWork.Repository<MoneyReserve>().GetByIdAsync(reserveId.Value);
+            if (reserve is null || reserve.AccountId != sourceAccount.Id || !reserve.IsActive)
+            {
+                throw new KeyNotFoundException("La reserva seleccionada no existe o no pertenece a tu cuenta.");
+            }
+
+            if (reserve.CurrentBalance < amount)
+            {
+                throw new InvalidOperationException(
+                    $"Saldo insuficiente en la reserva '{reserve.Name}'. Disponible: ${reserve.CurrentBalance:N2}, requerido: ${amount:N2}.");
+            }
+        }
+        else
+        {
+            if (sourceAccount.Money < amount)
+                throw new InvalidOperationException(
+                    $"Saldo insuficiente. Disponible: {sourceAccount.Money:N2}, requerido: {amount:N2}.");
+        }
 
         // ── 5. Operación atómica ──────────────────────────────────────────────
         await _unitOfWork.BeginTransactionAsync();
 
         var transferDate = DateTime.UtcNow;
 
-        sourceAccount.Money -= amount;
+        if (reserve != null)
+        {
+            reserve.CurrentBalance -= amount;
+            _unitOfWork.Repository<MoneyReserve>().Update(reserve);
+        }
+        else
+        {
+            sourceAccount.Money -= amount;
+            accountRepo.Update(sourceAccount);
+        }
+
         destAccount.Money   += amount;
-        accountRepo.Update(sourceAccount);
         accountRepo.Update(destAccount);
 
         var motive = !string.IsNullOrWhiteSpace(concept) ? concept.Trim() : null;
-        var outConcept = motive ?? $"Transferencia enviada a cuenta #{destAccount.Id}";
+        var reserveSuffix = reserve != null ? $" (desde reserva '{reserve.Name}')" : string.Empty;
+        var outConcept = motive != null
+            ? $"{motive}{reserveSuffix}"
+            : $"Transferencia enviada a cuenta #{destAccount.Id}{reserveSuffix}";
         var inConcept = motive != null ? $"Transferencia recibida · {motive}" : $"Transferencia recibida de cuenta #{sourceAccount.Id}";
 
         var transferOut = new Transaction
@@ -97,6 +133,29 @@ public class TransactionService : ITransactionService
         await transactionRepo.AddAsync(transferIn);
 
         await _unitOfWork.CommitAsync();
+
+        // Notificación al receptor de la transferencia (quien recibe dinero)
+        try
+        {
+            var senderName = !string.IsNullOrWhiteSpace(sourceAccount.User?.FirstName)
+                ? $"{sourceAccount.User.FirstName} {sourceAccount.User.LastName}".Trim()
+                : (!string.IsNullOrWhiteSpace(sourceAccount.User?.Email) ? sourceAccount.User.Email : $"la cuenta #{sourceAccount.Id}");
+
+            var motiveText = !string.IsNullOrWhiteSpace(motive) ? motive : "Varios";
+
+            await _notificationService.CreateNotificationAsync(
+                destAccount.UserId,
+                "Recibiste una transferencia",
+                $"Recibiste una transferencia de ${amount:N2} de {senderName}. Motivo: {motiveText}.",
+                "TransferIn",
+                "/history"
+            );
+
+        }
+        catch
+        {
+            // Failsafe para no romper la respuesta de transferencia
+        }
 
         return new TransferResponseDto
         {
@@ -130,9 +189,32 @@ public class TransactionService : ITransactionService
             .Where(t => t.AccountId == account.Id);
 
         // Aplicar filtros opcionales encadenados.
-        // Cada .Where() agrega una cláusula AND al SQL — solo si el filtro tiene valor.
-        if (queryDto.Type.HasValue)
+        // Filtro por agrupación de movimientos (ingresos / egresos)
+        if (!string.IsNullOrWhiteSpace(queryDto.MovementType))
+        {
+            var mt = queryDto.MovementType.Trim().ToLowerInvariant();
+            if (mt == "income" || mt == "ingreso" || mt == "ingresos")
+            {
+                query = query.Where(t => t.Type == TransactionType.Deposit || t.Type == TransactionType.TransferIn);
+            }
+            else if (mt == "expense" || mt == "egreso" || mt == "egresos")
+            {
+                query = query.Where(t => t.Type == TransactionType.TransferOut
+                                      || t.Type == TransactionType.FixedDeposit
+                                      || t.Type == TransactionType.Payment);
+            }
+        }
+        else if (queryDto.Type.HasValue)
+        {
             query = query.Where(t => t.Type == queryDto.Type.Value);
+        }
+
+        // Filtro por búsqueda textual en el concepto
+        if (!string.IsNullOrWhiteSpace(queryDto.Search))
+        {
+            var s = queryDto.Search.Trim();
+            query = query.Where(t => t.Concept != null && EF.Functions.Like(t.Concept, $"%{s}%"));
+        }
 
         if (queryDto.DateFrom.HasValue)
         {
@@ -141,6 +223,7 @@ public class TransactionService : ITransactionService
                 : queryDto.DateFrom.Value;
             query = query.Where(t => t.Date >= minDate);
         }
+
 
         if (queryDto.DateTo.HasValue)
         {

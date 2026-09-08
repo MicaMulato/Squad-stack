@@ -19,15 +19,18 @@ public class AccountService : IAccountService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly DepositSettings _depositSettings;
+    private readonly INotificationService _notificationService;
 
     public AccountService(
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        IOptions<DepositSettings> depositOptions)
+        IOptions<DepositSettings> depositOptions,
+        INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _depositSettings = depositOptions.Value;
+        _notificationService = notificationService;
     }
 
     /// <inheritdoc />
@@ -101,6 +104,22 @@ public class AccountService : IAccountService
         // CommitAsync llama SaveChanges + COMMIT.
         // Si algo falla ejecuta RollbackAsync automáticamente (ver UnitOfWork).
         await _unitOfWork.CommitAsync();
+
+        // Notificación al usuario por depósito acreditado
+        try
+        {
+            await _notificationService.CreateNotificationAsync(
+                userId,
+                "Depósito acreditado",
+                $"Se acreditaron ${amount:N2} en tu cuenta DigitalArs con éxito.",
+                "Deposit",
+                "/history"
+            );
+        }
+        catch
+        {
+            // Failsafe para no romper la respuesta del depósito si falla el log de notificación
+        }
 
         return new DepositResponseDto
         {

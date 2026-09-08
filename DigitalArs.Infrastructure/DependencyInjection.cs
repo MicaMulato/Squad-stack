@@ -1,4 +1,4 @@
-﻿using DigitalArs.Application.Interfaces;
+using DigitalArs.Application.Interfaces;
 using DigitalArs.Application.Settings;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Infrastructure.Data;
@@ -57,6 +57,9 @@ public static class DependencyInjection
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IFixedTermDepositService, FixedTermDepositService>();
         services.AddScoped<ICardService, CardService>();
+        services.AddScoped<IServicePaymentService, ServicePaymentService>();
+        services.AddScoped<IMoneyReserveService, MoneyReserveService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         return services;
     }

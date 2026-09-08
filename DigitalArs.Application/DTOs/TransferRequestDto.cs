@@ -13,5 +13,8 @@ public class TransferRequestDto
 
     /// <summary>Motivo o concepto de la transferencia.</summary>
     public string? Concept { get; set; }
+
+    /// <summary>ID opcional de la reserva de dinero de la que se debitan los fondos.</summary>
+    public int? ReserveId { get; set; }
 }
 

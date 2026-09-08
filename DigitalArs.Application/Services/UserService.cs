@@ -16,17 +16,20 @@ public class UserService : IUserService
     private readonly RoleManager<Role> _roleManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notificationService;
 
     public UserService(
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
         IUnitOfWork unitOfWork,
-        IMapper mapper)
+        IMapper mapper,
+        INotificationService notificationService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _notificationService = notificationService;
     }
 
     // =========================================================================
@@ -166,6 +169,23 @@ public class UserService : IUserService
             await _unitOfWork.SaveChangesAsync();
 
             await _unitOfWork.CommitAsync();
+
+            // Notificación de bienvenida al nuevo usuario creado
+            try
+            {
+                await _notificationService.CreateNotificationAsync(
+                    user.Id,
+                    "¡Bienvenido a DigitalArs!",
+                    $"Tu cuenta ha sido creada exitosamente con un saldo inicial de ${request.InitialBalance:N2}. ¡Comienza a operar!",
+                    "Welcome",
+                    "/dashboard",
+                    cancellationToken
+                );
+            }
+            catch
+            {
+                // Failsafe
+            }
 
             user.Role = role;
             return _mapper.Map<UserResponse>(user);
