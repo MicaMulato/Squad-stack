@@ -6,6 +6,12 @@ public class Account : BaseEntity
     public bool IsBlocked { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // CVU bancario único e inmodificable (22 dígitos estándar)
+    public string Cvu { get; set; } = string.Empty;
+
+    // Alias bancario único y modificable (ej. nombre.apellido.ars)
+    public string Alias { get; set; } = string.Empty;
+
     // Foreign Key y propiedad de navegación bidireccional con User
     public int UserId { get; set; }
     public User? User { get; set; }

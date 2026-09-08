@@ -1,9 +1,8 @@
-using DigitalArs.Application.DTOs.Common;
+﻿using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.DTOs.Users;
 using DigitalArs.Application.Exceptions;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
-using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -32,68 +31,55 @@ public class UserService : IUserService
         _notificationService = notificationService;
     }
 
-    // =========================================================================
-    // HU-12: CRUD Administrativo de Usuarios
-    // =========================================================================
-
     public async Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserFilterQuery query, CancellationToken cancellationToken = default)
     {
-        IQueryable<User> queryable;
-
-        if (query.IsActive.HasValue)
-        {
-            if (query.IsActive.Value)
-            {
-                queryable = _userManager.Users
-                    .Include(u => u.Role)
-                    .Include(u => u.Account)
-                    .Where(u => !u.IsDeleted);
-            }
-            else
-            {
-                queryable = _userManager.Users
-                    .IgnoreQueryFilters()
-                    .Include(u => u.Role)
-                    .Include(u => u.Account)
-                    .Where(u => u.IsDeleted);
-            }
-        }
-        else
-        {
-            queryable = _userManager.Users
-                .IgnoreQueryFilters()
-                .Include(u => u.Role)
-                .Include(u => u.Account);
-        }
+        var usersQuery = _userManager.Users
+            .Include(u => u.Role)
+            .Include(u => u.Account)
+            .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            var nameTrimmed = query.Name.Trim();
-            queryable = queryable.Where(u => u.FirstName.Contains(nameTrimmed) || u.LastName.Contains(nameTrimmed));
+            var name = query.Name.Trim();
+            usersQuery = usersQuery.Where(u =>
+                u.FirstName.Contains(name) ||
+                u.LastName.Contains(name));
         }
 
         if (!string.IsNullOrWhiteSpace(query.Email))
         {
-            var emailTrimmed = query.Email.Trim();
-            queryable = queryable.Where(u => u.Email != null && u.Email.Contains(emailTrimmed));
+            var email = query.Email.Trim();
+            usersQuery = usersQuery.Where(u => u.Email!.Contains(email));
         }
 
         if (!string.IsNullOrWhiteSpace(query.Role))
         {
-            var roleTrimmed = query.Role.Trim();
-            queryable = queryable.Where(u => u.Role != null && u.Role.Name == roleTrimmed);
+            var role = query.Role.Trim();
+            usersQuery = usersQuery.Where(u => u.Role != null && u.Role.Name == role);
         }
 
-        var totalItems = await queryable.CountAsync(cancellationToken);
+        if (query.IsActive.HasValue)
+        {
+            usersQuery = usersQuery.Where(u => !u.IsDeleted == query.IsActive.Value);
+        }
 
-        var items = await queryable
-            .OrderByDescending(u => u.CreatedAt)
+        var totalItems = await usersQuery.CountAsync(cancellationToken);
+
+        var users = await usersQuery
+            .OrderBy(u => u.Id)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .ProjectToType<UserListItemResponse>()
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<UserListItemResponse>(items, query.Page, query.PageSize, totalItems);
+        var items = _mapper.Map<List<UserListItemResponse>>(users);
+
+        return new PagedResult<UserListItemResponse>
+        {
+            Items = items,
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalItems = totalItems
+        };
     }
 
     public async Task<UserResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -102,7 +88,7 @@ public class UserService : IUserService
             .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
-        if (user == null)
+        if (user == null || user.IsDeleted)
         {
             return null;
         }
@@ -113,9 +99,19 @@ public class UserService : IUserService
     public async Task<UserResponse> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = request.Email.Trim();
-        var existingUser = await _userManager.FindByEmailAsync(normalizedEmail);
+
+        // Buscar incluyendo usuarios dados de baja lógica (IgnoreQueryFilters)
+        // para evitar la violación de índice único en base de datos
+        var existingUser = await _userManager.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+
         if (existingUser != null)
         {
+            if (existingUser.IsDeleted)
+            {
+                throw new ConflictException($"El email '{normalizedEmail}' pertenece a un usuario inactivo dado de baja. No se puede reutilizar este email.");
+            }
             throw new ConflictException($"El email '{normalizedEmail}' ya se encuentra registrado.");
         }
 
@@ -157,11 +153,29 @@ public class UserService : IUserService
                 throw new InvalidOperationException($"Error al asignar el rol: {errors}");
             }
 
+            // Generar CVU único de 22 dígitos
+            var randomDigits = Random.Shared.Next(100000000, 999999999);
+            var generatedCvu = $"0000003100010{randomDigits}";
+
+            // Generar Alias base (ej. roberto.carlos.ars)
+            var cleanFirst = request.FirstName.Trim().ToLowerInvariant().Replace(" ", "");
+            var cleanLast = request.LastName.Trim().ToLowerInvariant().Replace(" ", "");
+            var initialAlias = $"{cleanFirst}.{cleanLast}.ars";
+            
+            var aliasConflict = await _unitOfWork.Repository<Account>().Query()
+                .AnyAsync(a => a.Alias == initialAlias, cancellationToken);
+            if (aliasConflict)
+            {
+                initialAlias = $"{cleanFirst}.{cleanLast}.{Random.Shared.Next(100, 999)}.ars";
+            }
+
             var account = new Account
             {
                 UserId = user.Id,
                 Money = request.InitialBalance,
                 IsBlocked = false,
+                Cvu = generatedCvu,
+                Alias = initialAlias,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -211,8 +225,11 @@ public class UserService : IUserService
         var normalizedEmail = request.Email.Trim();
         if (!string.Equals(user.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase))
         {
-            var existingWithEmail = await _userManager.FindByEmailAsync(normalizedEmail);
-            if (existingWithEmail != null && existingWithEmail.Id != id)
+            var existingWithEmail = await _userManager.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Email == normalizedEmail && u.Id != id, cancellationToken);
+
+            if (existingWithEmail != null)
             {
                 throw new ConflictException($"El email '{normalizedEmail}' ya se encuentra registrado por otro usuario.");
             }
@@ -298,7 +315,6 @@ public class UserService : IUserService
             return null;
         }
 
-        // Si solicita cambio de contraseña, validar contraseña actual y aplicar cambio
         if (!string.IsNullOrEmpty(request.NewPassword))
         {
             if (string.IsNullOrEmpty(request.CurrentPassword))

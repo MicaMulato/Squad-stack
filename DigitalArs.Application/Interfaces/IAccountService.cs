@@ -1,4 +1,4 @@
-using DigitalArs.Application.DTOs;
+﻿using DigitalArs.Application.DTOs;
 using DigitalArs.Application.DTOs.Accounts;
 
 namespace DigitalArs.Application.Interfaces;
@@ -11,10 +11,6 @@ public interface IAccountService
     /// <summary>
     /// Deposita el monto indicado en la cuenta del usuario autenticado (HU-15).
     /// </summary>
-    /// <param name="userId">ID del usuario dueño de la cuenta.</param>
-    /// <param name="amount">Monto a depositar. Debe ser mayor a 0 y no superar el límite configurado.</param>
-    /// <param name="concept">Motivo o concepto del depósito (opcional).</param>
-    /// <returns>DTO con el nuevo saldo, el ID de la transacción y la fecha.</returns>
     Task<DepositResponseDto> DepositAsync(int userId, decimal amount, string? concept = null);
 
     /// <summary>
@@ -26,4 +22,14 @@ public interface IAccountService
     /// Consulta una cuenta por su ID (HU-14).
     /// </summary>
     Task<AccountResponse?> GetAccountByIdAsync(int id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Busca y resuelve los datos públicos de una cuenta destinataria mediante CVU, Alias o ID.
+    /// </summary>
+    Task<AccountLookupResponse> LookupAccountAsync(int currentUserId, string query, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Modifica el alias bancario de la cuenta del usuario autenticado, verificando unicidad.
+    /// </summary>
+    Task<AccountResponse> UpdateAliasAsync(int userId, string newAlias, CancellationToken cancellationToken = default);
 }

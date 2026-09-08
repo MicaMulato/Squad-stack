@@ -2,26 +2,20 @@
 
 > **Documento:** Especificación del Modelo de Datos Relacional  
 > **Sistema:** DigitalArs API (.NET 10 + Entity Framework Core 10 + SQL Server)  
-> **Versión:** 3.0 (Consolidado Final Completo: Cuentas, Transacciones, Inversiones, Tarjetas, Servicios, Reservas y Notificaciones)  
+> **Versión:** 2.1 (Actualizado con Identificadores Bancarios Interoperables: `Cvu` y `Alias`, más `Card` y `FixedTermDeposit`)  
 
 ---
 
-## 1. Diagrama Mermaid Actualizado
+## 1. Diagrama Mermaid
 
 ```mermaid
 erDiagram
     ROLE ||--o{ USER : "clasifica (1:N)"
     USER ||--|| ACCOUNT : "posee (1:1)"
-    USER ||--o{ NOTIFICATION : "recibe (1:N)"
     ACCOUNT ||--o{ TRANSACTION : "origen (1:N)"
     ACCOUNT ||--o{ TRANSACTION : "destino (1:N)"
     ACCOUNT ||--o{ FIXED_TERM_DEPOSIT : "invierte (1:N)"
     ACCOUNT ||--o{ CARD : "asocia (1:N)"
-    ACCOUNT ||--o{ MONEY_RESERVE : "reserva (1:N)"
-    ACCOUNT ||--o{ SERVICE_PAYMENT : "debits (1:N)"
-    SERVICE_PROVIDER ||--o{ SERVICE_PAYMENT : "factura (1:N)"
-    TRANSACTION ||--o| SERVICE_PAYMENT : "respalda (1:1)"
-    MONEY_RESERVE |o--o{ SERVICE_PAYMENT : "financia (0..1:N)"
 
     ROLE {
         int Id PK "Clave primaria autoincremental"
@@ -55,6 +49,8 @@ erDiagram
         int Id PK "Clave primaria autoincremental"
         int UserId FK,UK "Clave foránea única 1:1 con User"
         decimal Money "Saldo disponible con precisión decimal(18,2)"
+        string Cvu UK "CVU único e inmutable de 22 dígitos (HU-31)"
+        string Alias UK "Alias bancario alfanumérico único editable (HU-31)"
         bool IsBlocked "Estado de bloqueo preventivo de cuenta"
         datetime CreatedAt "Fecha de apertura de cuenta UTC"
     }
@@ -62,9 +58,9 @@ erDiagram
     TRANSACTION {
         int Id PK "Clave primaria autoincremental"
         int AccountId FK "Cuenta emisora o cuenta que recibe el depósito"
-        int ToAccountId FK "Cuenta receptora (nullable para depósitos o pagos)"
+        int ToAccountId FK "Cuenta receptora (nullable para depósitos)"
         decimal Amount "Monto transaccionado decimal(18,2)"
-        int Type "Tipo: 1=Deposit, 2=TransferReceived, 3=TransferSent, 4=ServicePayment"
+        int Type "Tipo: 1=Deposit, 2=TransferReceived, 3=TransferSent"
         string Concept "Detalle o motivo del movimiento"
         datetime Date "Marca temporal de la transacción UTC"
     }
@@ -94,50 +90,6 @@ erDiagram
         bool IsFrozen "Estado de congelamiento preventivo por el usuario"
         datetime CreatedAt "Fecha de emisión UTC"
     }
-
-    MONEY_RESERVE {
-        int Id PK "Clave primaria autoincremental"
-        int AccountId FK "Cuenta dueña de la reserva"
-        string Name "Nombre de la reserva o meta de ahorro"
-        decimal TargetAmount "Monto objetivo deseado decimal(18,2) nullable"
-        decimal CurrentBalance "Monto apartado actualmente decimal(18,2)"
-        string Icon "Ícono visual representativo"
-        string Color "Color temático de la reserva"
-        datetime CreatedAt "Fecha de creación UTC"
-        bool IsActive "Estado activo de la reserva"
-    }
-
-    SERVICE_PROVIDER {
-        int Id PK "Clave primaria autoincremental"
-        string Name "Nombre de la empresa prestadora de servicio"
-        int Category "Categoría: Electricity, Water, Gas, Telephony, Internet, Taxes"
-        string CodeLabel "Etiqueta del identificador (ej: Nro de Cliente)"
-        string IconName "Identificador del icono o logotipo de la empresa"
-        bool IsActive "Indica si la empresa está habilitada para cobros"
-    }
-
-    SERVICE_PAYMENT {
-        int Id PK "Clave primaria autoincremental"
-        int AccountId FK "Cuenta desde la cual se debitó el pago"
-        int ServiceProviderId FK "Empresa a la cual se le abonó el servicio"
-        int TransactionId FK,UK "Transacción contable que respalda el débito"
-        int ReserveId FK "Reserva utilizada para financiar el pago (opcional)"
-        string ReferenceNumber "Número de referencia, cliente o código de barras"
-        decimal Amount "Monto debitado decimal(18,2)"
-        datetime PaymentDate "Fecha y hora del pago UTC"
-        string ReceiptNumber "Número de comprobante digital único generado"
-    }
-
-    NOTIFICATION {
-        int Id PK "Clave primaria autoincremental"
-        int UserId FK "Usuario destinatario de la notificación"
-        string Title "Título de la notificación"
-        string Message "Cuerpo del mensaje descriptivo"
-        string Type "Tipo: Welcome, Deposit, TransferIn, ServicePayment, General"
-        bool IsRead "Indica si el usuario leyó la notificación"
-        datetime CreatedAt "Marca de tiempo de emisión UTC"
-        string ActionUrl "Ruta de navegación asociada (opcional)"
-    }
 ```
 
 ---
@@ -146,45 +98,46 @@ erDiagram
 
 ### 2.1. `User` (Usuarios del Sistema)
 - Hereda de `IdentityUser<int>` provisto por ASP.NET Core Identity.
-- Implementa **baja lógica (*Soft Delete*)** mediante `IsDeleted` con filtro global en EF Core (`HasQueryFilter`).
-- Índice único no agrupado sobre `NormalizedEmail` e índice sobre `IsDeleted` para consultas eficientes.
+- Se implementó un patrón de **baja lógica (*Soft Delete*)** mediante la propiedad `IsDeleted`.
+- Índice no agrupado único sobre `NormalizedEmail` e índice sobre `IsDeleted` para acelerar consultas de usuarios activos.
+- En la capa de aplicación, la creación y edición validan la unicidad del email incluso contra registros con baja lógica (`IgnoreQueryFilters`), impidiendo colisiones en base de datos.
 
-### 2.2. `Role` (Roles y Permisos - RBAC)
+### 2.2. `Role` (Roles y Permisos)
 - Hereda de `IdentityRole<int>`.
-- Roles sembrados: `Admin` (Id: 1, gestión de usuarios, auditoría) y `User` (Id: 2, operaciones de billetera).
+- Soporta roles principales: `Admin` (Id: 1) y `User` (Id: 2).
 
-### 2.3. `Account` (Cuenta Monetaria)
-- Relación **1 a 1** con `User`. Cada usuario dispone de una cuenta transaccional en pesos argentinos (ARS).
-- `Money` utiliza precisión `decimal(18,2)` para salvaguardar exactitud financiera.
-- Cuenta con bandera `IsBlocked` para inmovilización preventiva de saldo.
+### 2.3. `Account` (Cuenta Monetaria e Identificadores Bancarios)
+- Relación **1 a 1** estricta con `User`. Cada usuario registrado dispone exactamente de una cuenta monetaria en pesos (ARS).
+- **`Cvu`**: Clave Virtual Uniforme de **22 dígitos numéricos**. Es única a nivel de base de datos (`IX_Accounts_Cvu`) e inmutable una vez asignada al crearse la cuenta (HU-31).
+- **`Alias`**: Identificador alfanumérico legible único (`IX_Accounts_Alias`, formato `palabra1.palabra2.ars`) de hasta 50 caracteres. Es editable por el usuario desde su perfil con validación de unicidad en tiempo real.
+- La columna `Money` almacena el saldo con tipo de datos `decimal(18,2)` para prevenir desbordes o imprecisiones de punto flotante.
+- Incluye la propiedad `IsBlocked` para inhabilitar operaciones de débito o transferencia si se detecta actividad sospechosa.
 
 ### 2.4. `Transaction` (Movimientos y Transferencias)
-- Registra cualquier mutación monetaria con soporte para paginación de servidor (`OFFSET ... FETCH NEXT`).
-- Relación **1 a N** con `Account` (`AccountId`) y receptor opcional (`ToAccountId`).
-- Enumeración `TransactionType`: `Deposit` (1), `TransferReceived` (2), `TransferSent` (3), `ServicePayment` (4).
+- Registra cualquier mutación monetaria en el sistema.
+- Relación **1 a N** con `Account` a través de `AccountId` (cuenta de origen/débito).
+- Relación opcional con `ToAccountId` para identificar la cuenta de destino en transferencias interbancarias.
+- Enumeración `TransactionType`:
+  - `Deposit` (1): Depósito directo de fondos en la propia cuenta.
+  - `TransferReceived` (2): Transferencia entrante acreditada desde otra cuenta.
+  - `TransferSent` (3): Transferencia saliente debitada hacia otra cuenta.
 
 ### 2.5. `FixedTermDeposit` (Inversiones a Plazo Fijo)
-- Inversión a plazo con tasa nominal anual garantizada (19.0% TNA base).
-- Al constituirse debita fondos disponibles de la cuenta; al vencer o cancelarse liquida capital e intereses según el estado.
+- Relación **1 a N** con `Account`.
+- Permite la inmovilización de fondos por períodos de tiempo configurables (mínimo 30 días) a una TNA (Tasa Nominal Anual) parametrizada.
+- Al constituirse, debita el monto del saldo disponible y calcula el retorno final (`FinalAmount = Amount + InterestEarned`).
+- Estados soportados (`FixedTermDepositStatus`):
+  - `Active` (1): Plazo fijo en curso devengando intereses.
+  - `Finished` (2): Plazo fijo completado y liquidado con intereses acreditados.
+  - `Cancelled` (3): Plazo fijo rescindido anticipadamente con devolución de capital.
 
-### 2.6. `Card` (Tarjetas Virtuales y Físicas)
-- Emisión de tarjetas con numeración de 16 dígitos, CVV encriptado/hash y fecha de vencimiento a 3 años.
-- Control instantáneo de congelamiento preventivo (`IsFrozen`) sin baja definitiva.
-
-### 2.7. `MoneyReserve` (Apartados y Metas de Ahorro)
-- Permite al usuario separar saldo de su cuenta general para metas específicas (ahorro, vacaciones, emergencias, impuestos).
-- Permite depósitos y retiros internos atómicos con validación de saldo disponible.
-
-### 2.8. `ServiceProvider` y `ServicePayment` (Pago de Servicios e Impuestos)
-- Catálogo categorizado de empresas de servicios públicos y privados (Edenor, Edesur, AySA, Metrogas, Claro, Personal, Movistar, Fibertel, Telecentro, AFIP, ARBA, AGIP).
-- Ejecución atómica de pago debitando cuenta o reserva, emitiendo comprobante fiscal digital único (`ReceiptNumber`) y registrando la transacción vinculada.
-
-### 2.9. `Notification` (Centro de Alertas y Notificaciones)
-- Registro cronológico de avisos al usuario (depósitos recibidos, transferencias entrantes, pagos realizados y bienvenidas).
-- Soporte para conteo de no leídos en tiempo real y marcado atómico como leídas.
+### 2.6. `Card` (Tarjetas de Débito/Crédito)
+- Relación **1 a N** con `Account`.
+- Permite emitir tarjetas virtuales o físicas asociadas a la cuenta.
+- Propiedad `IsFrozen` para pausar instantáneamente compras y transacciones con la tarjeta sin cancelarla.
 
 ---
 
-## 3. Integridad Referencial y Reglas de Cascada
-- Se utiliza `DeleteBehavior.Restrict` / `DeleteBehavior.NoAction` en tablas financieras históricas (`Transactions`, `ServicePayments`, `FixedTermDeposits`) para garantizar inviolabilidad contable y auditoría forense.
-- Los usuarios eliminados administrativamente no eliminan filas físicas sino que activan `IsDeleted = true`.
+## 3. Restricciones de Integridad y Borrado en Cascada
+- Para evitar la pérdida accidental de datos contables e históricos, las relaciones hacia `Transaction`, `FixedTermDeposit` y `Card` utilizan la regla `DeleteBehavior.Restrict` / `DeleteBehavior.NoAction`.
+- La eliminación de usuarios se gestiona mediante *Soft Delete*, garantizando que ningún registro transaccional quede huérfano.

@@ -1,444 +1,748 @@
 {
-	"info": {
-		"_postman_id": "9a12b34c-5678-4ef0-9123-abcdef012345",
-		"name": "DigitalArs API - Billetera Virtual",
-		"description": "Colección completa de endpoints para la API de DigitalArs (HU-19).\nIncluye autenticación JWT, gestión de usuarios, cuentas bancarias, depósitos y transferencias.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{token}}",
-				"type": "string"
-			}
-		]
-	},
-	"item": [
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    var jsonData = pm.response.json();",
-									"    if (jsonData.token) {",
-									"        pm.environment.set(\"token\", jsonData.token);",
-									"        console.log(\"Token guardado automáticamente en el entorno.\");",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin@digitalars.com\",\n  \"password\": \"Admin123!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/auth/login",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"login"
-							]
-						},
-						"description": "Inicia sesión con credenciales de usuario y retorna un token JWT."
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Accounts",
-			"item": [
-				{
-					"name": "Get My Account (Consulta de Saldo)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/accounts/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"accounts",
-								"me"
-							]
-						},
-						"description": "Obtiene el saldo, ID y fecha de creación de la cuenta del usuario autenticado (HU-14)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Account By Id (Admin)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/accounts/1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"accounts",
-								"1"
-							]
-						},
-						"description": "Obtiene los datos de una cuenta por su identificador numérico (solo rol Admin)."
-					},
-					"response": []
-				},
-				{
-					"name": "Deposit (Depósito de Fondos)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"amount\": 5000\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/accounts/deposit",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"accounts",
-								"deposit"
-							]
-						},
-						"description": "Realiza un depósito monetario en la cuenta bancaria del usuario autenticado (HU-15)."
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Transactions",
-			"item": [
-				{
-					"name": "Transfer (Transferencia entre Cuentas)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"destinationAccountId\": 2,\n  \"amount\": 1000\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/transactions/transfer",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"transactions",
-								"transfer"
-							]
-						},
-						"description": "Transfiere fondos desde la cuenta del usuario autenticado hacia una cuenta destino (HU-16)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get My Transaction History",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/transactions/me?page=1&pageSize=10",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"transactions",
-								"me"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "pageSize",
-									"value": "10"
-								},
-								{
-									"key": "type",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "dateFrom",
-									"value": "2026-01-01",
-									"disabled": true
-								},
-								{
-									"key": "dateTo",
-									"value": "2026-12-31",
-									"disabled": true
-								},
-								{
-									"key": "amountMin",
-									"value": "100",
-									"disabled": true
-								},
-								{
-									"key": "amountMax",
-									"value": "50000",
-									"disabled": true
-								}
-							]
-						},
-						"description": "Devuelve el historial paginado de movimientos con filtros avanzados (HU-17)."
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Users",
-			"item": [
-				{
-					"name": "Get My Profile",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/users/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"me"
-							]
-						},
-						"description": "Obtiene el perfil del usuario actualmente autenticado (HU-13)."
-					},
-					"response": []
-				},
-				{
-					"name": "Update My Profile",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"Roberto\",\n  \"lastName\": \"Carlos\",\n  \"currentPassword\": \"Roberto1!\",\n  \"newPassword\": \"RobertoNuevo123!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/users/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"me"
-							]
-						},
-						"description": "Actualiza los datos y opcionalmente la contraseña del usuario autenticado (HU-13)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Users (Admin)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/users?page=1&pageSize=10",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "pageSize",
-									"value": "10"
-								},
-								{
-									"key": "name",
-									"value": "Carlos",
-									"disabled": true
-								},
-								{
-									"key": "email",
-									"value": "rober",
-									"disabled": true
-								},
-								{
-									"key": "role",
-									"value": "User",
-									"disabled": true
-								},
-								{
-									"key": "isActive",
-									"value": "true",
-									"disabled": true
-								}
-							]
-						},
-						"description": "Listado administrativo paginado de usuarios con filtros (HU-12)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get User By Id (Admin)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/users/2",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"2"
-							]
-						},
-						"description": "Obtiene el detalle de un usuario por su ID (HU-12)."
-					},
-					"response": []
-				},
-				{
-					"name": "Create User (Admin)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"email\": \"juanperez@digitalars.com\",\n  \"password\": \"Juan123!\",\n  \"role\": \"User\",\n  \"initialBalance\": 10000\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/users",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users"
-							]
-						},
-						"description": "Crea un nuevo usuario y su cuenta asociada en la misma transacción (HU-12)."
-					},
-					"response": []
-				},
-				{
-					"name": "Update User (Admin)",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"Juan Modificado\",\n  \"lastName\": \"Perez\",\n  \"email\": \"juanperez_mod@digitalars.com\",\n  \"role\": \"User\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/users/2",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"2"
-							]
-						},
-						"description": "Actualiza la información de un usuario existente (HU-12)."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User (Admin - Baja Lógica)",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/users/2",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"2"
-							]
-						},
-						"description": "Realiza la baja lógica de un usuario bloqueando su acceso (HU-12)."
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "https://localhost:7155",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "9a12b34c-5678-4ef0-9123-abcdef012345",
+    "name": "DigitalArs API - Billetera Virtual",
+    "description": "Colección completa y actualizada de endpoints para la API de DigitalArs.\nIncluye autenticación JWT, gestión de cuentas bancarias (CVU, Alias, Saldo), depósitos, transferencias atómicas, plazos fijos de inversión, tarjetas virtuales/físicas y administración de usuarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.token) {",
+                  "        pm.environment.set(\"token\", jsonData.token);",
+                  "        console.log(\"Token guardado automáticamente en el entorno.\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@digitalars.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Inicia sesión como Administrador y almacena automáticamente el token JWT en el entorno."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.token) {",
+                  "        pm.environment.set(\"token\", jsonData.token);",
+                  "        console.log(\"Token de usuario guardado automáticamente.\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"robercarlos3@gmail.com\",\n  \"password\": \"Roberto1!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Inicia sesión con credenciales de usuario estándar y guarda el token JWT en el entorno."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Get My Account (Consulta de Saldo, CVU y Alias)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "me"
+              ]
+            },
+            "description": "Devuelve los datos de la cuenta bancaria del usuario autenticado: saldo, CVU de 22 dígitos, Alias y estado."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Alias",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alias\": \"roberto.carlos.ars\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/me/alias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "me",
+                "alias"
+              ]
+            },
+            "description": "Actualiza el Alias único de la cuenta del usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Lookup Account (por CVU o Alias)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/lookup?query=roberto.carlos.ars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "lookup"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "roberto.carlos.ars",
+                  "description": "CVU de 22 dígitos o Alias del destinatario"
+                }
+              ]
+            },
+            "description": "Busca los datos de una cuenta destinataria por su CVU o Alias para validar transferencias en tiempo real."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account By Id (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "1"
+              ]
+            },
+            "description": "Obtiene el detalle de una cuenta bancaria por su ID (Requiere rol Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Deposit (Depósito de Fondos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50000,\n  \"concept\": \"Depósito de fondos\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/deposit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "accounts",
+                "deposit"
+              ]
+            },
+            "description": "Acredita fondos monetarios en la cuenta bancaria del usuario autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Transfer (Transferencia entre Cuentas)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinationAccountId\": 2,\n  \"amount\": 15000,\n  \"concept\": \"Pago de servicios\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions",
+                "transfer"
+              ]
+            },
+            "description": "Ejecuta una transferencia atómica de dinero desde la cuenta del usuario autenticado hacia la cuenta destino."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Transaction History (Historial Paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/me?page=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transactions",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10",
+                  "description": "Elementos por página"
+                },
+                {
+                  "key": "type",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "1=Deposit, 2=TransferReceived, 3=TransferSent"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2026-01-01",
+                  "disabled": true,
+                  "description": "Fecha desde (YYYY-MM-DD)"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2026-12-31",
+                  "disabled": true,
+                  "description": "Fecha hasta (YYYY-MM-DD)"
+                },
+                {
+                  "key": "amountMin",
+                  "value": "100",
+                  "disabled": true,
+                  "description": "Monto mínimo"
+                },
+                {
+                  "key": "amountMax",
+                  "value": "500000",
+                  "disabled": true,
+                  "description": "Monto máximo"
+                }
+              ]
+            },
+            "description": "Obtiene el historial paginado de movimientos con filtros opcionales de tipo, rango de fechas y montos."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cards",
+      "item": [
+        {
+          "name": "Request Virtual Card (Solicitar Tarjeta Virtual)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cards/virtual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cards",
+                "virtual"
+              ]
+            },
+            "description": "Genera y asocia una nueva tarjeta de débito virtual para la cuenta del usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Cards (Listar Tarjetas)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cards/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cards",
+                "me"
+              ]
+            },
+            "description": "Obtiene la lista de tarjetas activas asociadas a la cuenta del usuario autenticado (con números enmascarados)."
+          },
+          "response": []
+        },
+        {
+          "name": "Reveal Card Sensitive Data (CVV y Número Completo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cards/1/reveal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cards",
+                "1",
+                "reveal"
+              ]
+            },
+            "description": "Desencripta y revela el número completo de 16 dígitos y el código de seguridad CVV de la tarjeta especificada."
+          },
+          "response": []
+        },
+        {
+          "name": "Freeze / Unfreeze Card (Congelar / Descongelar)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cards/1/freeze",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cards",
+                "1",
+                "freeze"
+              ]
+            },
+            "description": "Alterna el estado de congelamiento temporal de una tarjeta de débito."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Card (Baja Definitiva)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cards/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cards",
+                "1"
+              ]
+            },
+            "description": "Da de baja lógica permanente a la tarjeta especificada."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fixed Term Deposits",
+      "item": [
+        {
+          "name": "Simulate Fixed Term Deposit (Simulador)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100000,\n  \"durationDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/fixed-deposits/simulate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "fixed-deposits",
+                "simulate"
+              ]
+            },
+            "description": "Calcula el interés ganado, monto final y fecha de vencimiento según el monto y plazo ingresado sin comprometer fondos."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Fixed Term Deposit (Constituir Plazo Fijo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50000,\n  \"durationDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/fixed-deposits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "fixed-deposits"
+              ]
+            },
+            "description": "Constituye un nuevo plazo fijo debitando los fondos correspondientes de la cuenta del usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Fixed Term Deposits (Listar Plazos Fijos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/fixed-deposits/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "fixed-deposits",
+                "me"
+              ]
+            },
+            "description": "Lista todos los plazos fijos (activos, finalizados y cancelados) del usuario autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Obtiene los datos personales del usuario actualmente autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Roberto\",\n  \"lastName\": \"Carlos\",\n  \"currentPassword\": \"Roberto1!\",\n  \"newPassword\": \"Roberto123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Permite actualizar datos personales y/o cambiar la contraseña del usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Users (Admin - Listado Paginado con Saldo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10",
+                  "description": "Cantidad por página"
+                },
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filtro por nombre"
+                },
+                {
+                  "key": "email",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filtro por email"
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filtro por rol (Admin/User)"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Filtro por estado activo (true/false)"
+                }
+              ]
+            },
+            "description": "Retorna el listado paginado de usuarios con su saldo de cuenta real y roles asignados (Solo Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By Id (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "2"
+              ]
+            },
+            "description": "Obtiene la información detallada de un usuario por su ID (Solo Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"email\": \"juan.perez@digitalars.com\",\n  \"password\": \"Juan123!\",\n  \"role\": \"User\",\n  \"initialBalance\": 10000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Crea un nuevo usuario con cuenta bancaria, CVU, Alias y saldo inicial asignado (Solo Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Roberto\",\n  \"lastName\": \"Carlos\",\n  \"email\": \"robercarlos3@gmail.com\",\n  \"role\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "2"
+              ]
+            },
+            "description": "Actualiza los datos personales, email o rol de un usuario existente (Solo Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Admin - Baja Lógica)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "2"
+              ]
+            },
+            "description": "Aplica baja lógica (Soft Delete) y bloqueo de acceso a un usuario (Solo Admin)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
 }

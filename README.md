@@ -1,55 +1,60 @@
-# DigitalArs — Billetera Virtual (Full Stack Solution)
+# DigitalArs — Billetera Virtual (Backend API)
 
 > **Proyecto:** Billetera Virtual / Digital Wallet  
 > **Programa:** Aceleración Técnica en **Alchemie Acceleration Tech**  
 > **Equipo:** **Squad-stack** — Emmanuel, Andrés, Micaela y Máximo  
-> **Stack Completo:** .NET 10 | ASP.NET Core Web API | Entity Framework Core 10 | SQL Server | ASP.NET Core Identity | JWT Bearer | React 19 | Vite | Material UI v6 | GSAP | jsPDF  
+> **Stack Principal:** .NET 10 | ASP.NET Core Web API | Entity Framework Core | SQL Server | ASP.NET Core Identity | JWT Bearer  
 
 ---
 
 ## 1. Descripción del Proyecto
 
-**DigitalArs** es una solución fintech integral construida con arquitectura limpia (*Clean Architecture*), estándares bancarios y alta fidelidad visual. Proporciona una plataforma robusta y reactiva compuesta por:
-
-1. **Backend Web API (.NET 10):** Servicio RESTful de alto desempeño con inyección de dependencias modular, transaccionalidad atómica (ACID), paginación optimizada a nivel de motor SQL Server (`OFFSET ... FETCH NEXT`), control de accesos basado en roles (*RBAC*), autenticación JWT y persistencia mediante Entity Framework Core 10.
-2. **Frontend SPA (React 19 + Vite):** Aplicación web reactiva para usuarios y administradores, con soporte de Modo Oscuro semántico, fondo interactivo con físicas elásticas (`GSAP`), emisión de comprobantes oficiales en PDF (`jsPDF`), microinteracciones fluidas (`Motion`), diseño responsivo (móvil y escritorio) y navegación protegida por roles.
+**DigitalArs** es una solución fintech integral construida con arquitectura limpia (*Clean Architecture*) y estándares empresariales. Proporciona una API RESTful de alto rendimiento para la gestión financiera segura de cuentas bancarias virtuales, procesamiento de transferencias atómicas entre usuarios (por CVU, Alias o Cuenta), depósitos con comprobante, simulación y constitución de plazos fijos de inversión, emisión y administración de tarjetas (virtuales y físicas), y un panel de control administrativo con control de accesos basado en roles (*RBAC*).
 
 ---
 
-## 2. Stack Tecnológico de Punta a Punta
+## 2. Arquitectura del Sistema (Clean Architecture)
 
-### Backend (C# / .NET 10)
-| Componente | Tecnología | Versión | Rol en la Solución |
-| :--- | :--- | :---: | :--- |
-| **Runtime & SDK** | [.NET](https://dotnet.microsoft.com/) | `10.0` | Motor de ejecución principal compilado de alto rendimiento |
-| **Web Framework** | [ASP.NET Core Web API](https://learn.microsoft.com/aspnet/core) | `10.0` | Pipeline HTTP, middlewares, filtros y controladores REST |
-| **ORM** | [Entity Framework Core](https://learn.microsoft.com/ef/core) | `10.0` | Mapeo objeto-relacional *Code First*, Fluent API y migraciones |
-| **Base de Datos** | Microsoft SQL Server / LocalDB | `2022+` | Persistencia relacional ACID con integridad referencial |
-| **Seguridad e Identidad**| ASP.NET Core Identity | `10.0` | Gestión de usuarios, roles, claims y hash seguro PBKDF2 |
-| **Autenticación** | JWT (JSON Web Tokens) | `Bearer` | Tokens criptográficos HMAC-SHA256 para sesiones sin estado |
-| **Documentación** | OpenAPI / Swagger UI | `5.32+` | Explorador interactivo de endpoints REST |
-| **Validación** | FluentValidation | `11.9+` | Validación declarativa de reglas de negocio en DTOs |
+El backend está organizado en cuatro capas estrictamente desacopladas para garantizar alta mantenibilidad, testabilidad y separación de responsabilidades:
 
-### Frontend (React 19 / JavaScript)
-| Componente | Tecnología | Versión | Rol en la Solución |
-| :--- | :--- | :---: | :--- |
-| **Librería UI** | [React](https://react.dev/) | `19` | Arquitectura basada en componentes funcionales y hooks |
-| **Tooling & Bundler** | [Vite](https://vite.dev/) | `8` | Entorno de desarrollo con HMR ultra veloz y empaquetado optimizado |
-| **Componentes & UI** | [Material UI (MUI)](https://mui.com/) | `v6` | Sistema de diseño empresarial, tokens semánticos y accesibilidad |
-| **Microinteracciones** | [Motion](https://motion.dev/) | `13` | Físicas de resorte, elevación al hover y feedback táctil |
-| **Canvas Animado** | [GSAP](https://gsap.com/) | `3.14+` | Fondo reactivo interactivo de puntos con inercia en el Login |
-| **Comprobantes PDF** | [jsPDF](https://github.com/parallax/jsPDF) | `4.2` | Generación y descarga en cliente de comprobantes bancarios |
-| **Cliente HTTP** | [Axios](https://axios-http.com/) | `1.20` | Instancia singleton con interceptores automáticos de JWT |
-| **Enrutamiento** | [React Router DOM](https://reactrouter.com/) | `7` | Navegación SPA declarativa con guardianes de autenticación y rol |
+```
+DigitalArs.slnx
+├── DigitalArs.Domain/           # Capa de Dominio: Entidades de negocio puras, enums y reglas independientes
+├── DigitalArs.Application/      # Capa de Aplicación: Interfaces de servicios, DTOs, validaciones y lógica de negocio
+├── DigitalArs.Infrastructure/   # Capa de Infraestructura: Entity Framework Core, ApplicationDbContext, Repositorios, Servicios y Migraciones
+├── DigitalArs.Api/              # Capa de Presentación: Controllers REST, Middlewares, Filtros, Swagger y Program.cs
+└── DigitalArs.UnitTests/        # Pruebas Unitarias: Tests automatizados con xUnit, Moq y FluentAssertions
+```
+
+### Inyección de Dependencias Modular
+La configuración de servicios se encuentra desacoplada mediante métodos de extensión:
+- `services.AddApplication()`: Registra validadores FluentValidation y configuraciones de aplicación.
+- `services.AddInfrastructure(configuration)`: Registra `ApplicationDbContext`, Identity, Repositorios genéricos, Unit of Work y servicios de infraestructura (`AccountService`, `TransactionService`, `FixedTermDepositService`, `CardService`, `JwtTokenGenerator`).
 
 ---
 
-## 3. Requisitos Previos
+## 3. Stack Tecnológico
 
-Para ejecutar la solución completa en cualquier equipo de desarrollo se requiere:
+| Componente | Tecnología | Versión | Rol en la Solución |
+| :--- | :--- | :---: | :--- |
+| **Runtime & SDK** | [.NET](https://dotnet.microsoft.com/) | `10.0` | Framework de ejecución principal de alto rendimiento |
+| **Web Framework** | [ASP.NET Core](https://learn.microsoft.com/aspnet/core) | `10.0` | Creación de controladores RESTful, middlewares y pipeline HTTP |
+| **ORM** | [Entity Framework Core](https://learn.microsoft.com/ef/core) | `10.0` | Mapeo objeto-relacional con enfoque *Code First* y Fluent API |
+| **Motor de Base de Datos** | Microsoft SQL Server / LocalDB | `2022+` | Base de datos relacional con integridad referencial e índices optimizados |
+| **Seguridad e Identidad** | ASP.NET Core Identity | `10.0` | Gestión de usuarios, roles, claims y hash seguro de contraseñas |
+| **Autenticación** | JWT (JSON Web Tokens) | `Bearer` | Tokens firmados criptográficamente con `HMAC-SHA256` |
+| **Documentación API** | OpenAPI / Swagger UI | `Swashbuckle 7.0` | Explorador interactivo y documentación viva de endpoints |
+| **Colección Postman** | Postman Collection v2.1 | `2.1` | Colección completa con variables de entorno y auto-guardado de token |
+| **Testing Automatizado** | xUnit & Moq | `2.9+` | Suite de pruebas unitarias y mocks para lógica de servicios |
+
+---
+
+## 4. Requisitos Previos
+
+Antes de clonar y ejecutar el proyecto, asegúrese de tener instalado:
 1. **[.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)** (o superior).
-2. **[Node.js](https://nodejs.org/)** (versión `18.0.0` o superior) y **npm** (`9.0.0` o superior).
-3. **Microsoft SQL Server** (LocalDB incluido con Visual Studio, SQL Server Express o contenedor Docker).
+2. **Microsoft SQL Server** (LocalDB incluido con Visual Studio, SQL Server Express o instancia de SQL Server en Docker).
+3. **IDE / Editor:** Visual Studio 2022+, VS Code (con C# Dev Kit), Rider o Antigravity IDE.
 4. **Herramienta EF Core CLI:**
    ```bash
    dotnet tool install --global dotnet-ef
@@ -57,149 +62,217 @@ Para ejecutar la solución completa en cualquier equipo de desarrollo se requier
 
 ---
 
-## 4. Instalación y Puesta en Marcha
+## 5. Instalación y Puesta en Marcha
 
-> 💡 **Garantía:** Siguiendo exclusivamente los pasos a continuación, cualquier desarrollador puede clonar, inicializar la base de datos y correr el sistema completo.
-
-### Paso 1: Clonar Repositorios
+### Paso 1: Clonar el Repositorio
 ```bash
-# Repositorio Backend
 git clone https://github.com/MicaMulato/Squad-stack.git
 cd Squad-stack
-
-# Repositorio Frontend (en directorio paralelo o adyacente)
-git clone https://github.com/porrettimaximo/Squad-stack-Frontend.git
 ```
 
----
+### Paso 2: Configurar la Cadena de Conexión y JWT
+Verifique la cadena de conexión en `DigitalArs.Api/appsettings.json` o configure su entorno local en `DigitalArs.Api/appsettings.Development.json`:
 
-### Paso 2: Configuración y Ejecución del Backend
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=DigitalArsDb;Trusted_Connection=true;TrustServerCertificate=true;"
+  },
+  "JwtSettings": {
+    "SecretKey": "CAMBIA_ESTA_CLAVE_POR_UNA_PROPIA_DE_AL_MENOS_32_CARACTERES",
+    "Issuer": "DigitalArs.Api",
+    "Audience": "DigitalArsUsers",
+    "ExpirationMinutes": 60
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "http://localhost:5173"
+    ]
+  },
+  "DepositSettings": {
+    "MaxAmountPerOperation": 1000000
+  }
+}
+```
 
-1. **Revisar cadena de conexión:**  
-   El archivo `DigitalArs.Api/appsettings.json` viene preconfigurado para `(localdb)\\MSSQLLocalDB` (o use `appsettings.Example.json` como referencia):
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=DigitalArsDb;Trusted_Connection=true;TrustServerCertificate=true;"
-   }
-   ```
-2. **Aplicar Migraciones de Base de Datos y Precarga de Datos (*Seed*):**  
-   Posicionado en la raíz de `Squad-stack`, ejecute:
-   ```bash
-   dotnet ef database update --project DigitalArs.Infrastructure --startup-project DigitalArs.Api
-   ```
-   *Esto creará automáticamente la base de datos `DigitalArsDb`, todas las tablas, relaciones, roles y usuarios de prueba.*
+### Paso 3: Aplicar Migraciones de Base de Datos y Seed Data
+Ejecute el siguiente comando para generar la base de datos `DigitalArsDb` y precargar los datos de prueba iniciales:
 
-3. **Compilar y Ejecutar la API:**
-   ```bash
-   dotnet run --project DigitalArs.Api --launch-profile https
-   ```
-   *La API quedará escuchando en:*
-   - **HTTPS:** `https://localhost:7142`
-   - **HTTP:** `http://localhost:5065`
-   - **Swagger UI interactivo:** `http://localhost:5065/swagger`
+```bash
+dotnet ef database update --project DigitalArs.Infrastructure --startup-project DigitalArs.Api
+```
 
----
+### Paso 4: Ejecutar la API
+```bash
+dotnet run --project DigitalArs.Api
+```
 
-### Paso 3: Configuración y Ejecución del Frontend
-
-1. **Posicionarse en el directorio del Frontend:**
-   ```bash
-   cd ../Squad-stack-Frontend
-   ```
-2. **Crear archivo de variables de entorno (opcional si usa el puerto HTTPS por defecto):**
-   ```bash
-   cp .env.example .env
-   ```
-   *Contenido de `.env`:*
-   ```env
-   VITE_API_URL=https://localhost:7142/api
-   ```
-3. **Instalar dependencias:**
-   ```bash
-   npm install
-   ```
-4. **Iniciar el servidor de desarrollo:**
-   ```bash
-   npm run dev
-   ```
-   *El frontend estará disponible en:* `http://localhost:5173`
+La API se iniciará de forma predeterminada en:
+- **API URL:** `http://localhost:5065` o `https://localhost:7142`
+- **Swagger UI:** `http://localhost:5065/swagger`
 
 ---
 
-## 5. Credenciales de Prueba (Datos Precargados)
+## 6. Credenciales de Prueba (Data Seeding)
 
-La base de datos se inicializa con los siguientes usuarios listos para operar inmediatamente:
+La base de datos se inicializa automáticamente con usuarios, cuentas activas, CVU/Alias generados, saldos e historial de movimientos:
 
-| Rol | Usuario / Nombre | Email | Contraseña | Saldo Inicial | Permisos y Vistas |
-| :--- | :--- | :--- | :--- | :---: | :--- |
-| **Admin** | Administrador DigitalArs | `admin@digitalars.com` | `Admin123!` | $500.000,00 | Panel de Gestión de Usuarios (`/admin`), control de roles, bloqueos y configuración de modo oscuro. |
-| **User** | Roberto Carlos | `robercarlos3@gmail.com` | `Roberto1!` | $260.000,00 | Billetera completa (`/dashboard`), transferencias, depósitos, inversiones, tarjetas, servicios y reservas. |
-| **User** | Mohammed Khan | `mokha@gmail.com` | `Mohammed1!` | $185.000,50 | Billetera completa (`/dashboard`), transferencias y comprobantes. |
-| **User** | Alejandro Silva | `alejandro.silva@digitalars.com` | `User123!` | $45.230,50 | Usuario estándar con historial de movimientos. |
-| **User** | Micaela Mulato | `micaela.mulato@digitalars.com` | `User123!` | $320.000,00 | Usuario estándar con inversiones y tarjetas. |
-| **User** | Emmanuel Torres | `emmanuel.torres@digitalars.com` | `User123!` | $410.000,00 | Usuario estándar con apartados de reserva. |
-
-> 🔒 **Seguridad de Passwords:** Todas las contraseñas están almacenadas mediante el algoritmo PBKDF2 con salt criptográfico de ASP.NET Core Identity.
+| Rol | Nombre | Email | Contraseña | Saldo Inicial | Estado |
+| :--- | :--- | :--- | :--- | :---: | :---: |
+| **Admin** | Administrador DigitalArs | `admin@digitalars.com` | `Admin123!` | $500.000,00 | Activo |
+| **User** | Roberto Carlos | `robercarlos3@gmail.com` | `Roberto1!` | $260.000,00 | Activo |
+| **User** | Mohammed Khan | `mokha@gmail.com` | `Mohammed1!` | $185.000,50 | Activo |
+| **User** | Alejandro Silva | `alejandro.silva@digitalars.com` | `User123!` | $45.230,50 | Activo |
+| **User** | Micaela Mulato | `micaela.mulato@digitalars.com` | `User123!` | $320.000,00 | Activo |
+| **User** | Emmanuel Torres | `emmanuel.torres@digitalars.com` | `User123!` | $410.000,00 | Activo |
 
 ---
 
-## 6. Diagrama Entidad-Relación (ER Diagram Actualizado)
-
-El modelo de datos relacional soporta el ecosistema financiero completo:
+## 7. Diagrama Entidad-Relación (ER Diagram)
 
 ```mermaid
 erDiagram
-    ROLE ||--o{ USER : "clasifica (1:N)"
-    USER ||--|| ACCOUNT : "posee (1:1)"
-    USER ||--o{ NOTIFICATION : "recibe (1:N)"
+    ROLE ||--o{ USER : "posee (1:N)"
+    USER ||--|| ACCOUNT : "titular de (1:1)"
     ACCOUNT ||--o{ TRANSACTION : "origen (1:N)"
     ACCOUNT ||--o{ TRANSACTION : "destino (1:N)"
-    ACCOUNT ||--o{ FIXED_TERM_DEPOSIT : "invierte (1:N)"
-    ACCOUNT ||--o{ CARD : "asocia (1:N)"
-    ACCOUNT ||--o{ MONEY_RESERVE : "reserva (1:N)"
-    ACCOUNT ||--o{ SERVICE_PAYMENT : "debits (1:N)"
-    SERVICE_PROVIDER ||--o{ SERVICE_PAYMENT : "factura (1:N)"
-    TRANSACTION ||--o| SERVICE_PAYMENT : "respalda (1:1)"
-    MONEY_RESERVE |o--o{ SERVICE_PAYMENT : "financia (0..1:N)"
+    ACCOUNT ||--o{ FIXED_TERM_DEPOSIT : "invierte en (1:N)"
+    ACCOUNT ||--o{ CARD : "emite (1:N)"
+
+    ROLE {
+        int Id PK
+        string Name
+        string NormalizedName
+        string Description
+        string ConcurrencyStamp
+    }
+
+    USER {
+        int Id PK
+        string FirstName
+        string LastName
+        string Email UK
+        string UserName
+        string PasswordHash
+        int RoleId FK
+        bool IsDeleted
+        datetime CreatedAt
+        string SecurityStamp
+        string ConcurrencyStamp
+    }
+
+    ACCOUNT {
+        int Id PK
+        int UserId FK,UK
+        decimal Money
+        string Cvu UK
+        string Alias UK
+        bool IsBlocked
+        datetime CreatedAt
+    }
+
+    TRANSACTION {
+        int Id PK
+        int AccountId FK
+        int ToAccountId FK "nullable"
+        decimal Amount
+        int Type "1=Deposit, 2=TransferReceived, 3=TransferSent"
+        string Concept
+        datetime Date
+    }
+
+    FIXED_TERM_DEPOSIT {
+        int Id PK
+        int AccountId FK
+        decimal Amount
+        decimal InterestRate
+        int DurationDays
+        datetime CreationDate
+        datetime ClosingDate
+        decimal InterestEarned
+        decimal FinalAmount
+        int Status "1=Active, 2=Finished, 3=Cancelled"
+    }
+
+    CARD {
+        int Id PK
+        int AccountId FK
+        string HolderName
+        string CardNumber "16 digits"
+        string SecurityCode "3 digits"
+        datetime ExpirationDate
+        int Type "1=Virtual, 2=Physical"
+        bool IsActive
+        bool IsFrozen
+        datetime CreatedAt
+    }
 ```
 
 > 📄 **Documentación Detallada del Modelo Relacional:**  
-> Consulta el desglose completo de entidades, tipos, índices y restricciones en:  
-> 👉 [docs/diagrama-er.md](docs/diagrama-er.md)
+> Consulta el desglose completo de entidades, tipos, índices y restricciones en [docs/diagrama-er.md](docs/diagrama-er.md).
 
 ---
 
-## 7. Módulos y Endpoints Principales de la API
+## 8. Catálogo de Módulos y Endpoints de la API
 
-- **Autenticación (`/api/auth`):** Login con emisión de JWT y registro de nuevos usuarios.
-- **Cuentas y Saldo (`/api/accounts`):** Saldo en tiempo real (`/balance`), depósitos con validación (`/deposit`) y datos del titular (`/me`).
-- **Transferencias (`/api/transactions`):** Transferencias atómicas entre cuentas (`/transfer`) e historial paginado en base de datos (`/history`).
-- **Inversiones a Plazo Fijo (`/api/fixedterm`):** Constitución con TNA garantizada, cálculo de intereses y cancelación anticipada.
-- **Tarjetas (`/api/cards`):** Emisión de tarjetas virtuales y físicas, congelamiento/descongelamiento instantáneo (`/toggle-freeze`).
-- **Pago de Servicios (`/api/services`):** Catálogo categorizado de empresas (`/providers`), consulta simulada de deuda (`/simulate-invoice`) y pago con comprobante (`/pay`).
-- **Reservas de Dinero (`/api/reserves`):** Creación de metas de ahorro, ingreso de fondos y retiro de saldo hacia la cuenta principal.
-- **Notificaciones (`/api/notifications`):** Listado cronológico de alertas (`/me`), contador de no leídas (`/unread-count`) y marcado como leídas (`/mark-read`).
-- **Administración (`/api/users`):** Listado paginado de usuarios para administradores, asignación de roles y baja lógica (*Soft Delete*).
+### 8.1. Autenticación (`/api/auth`)
+- `POST /api/auth/login`: Autentica credenciales y emite token JWT con claims de usuario y rol.
+
+### 8.2. Cuentas y Datos Bancarios (`/api/accounts`)
+- `GET /api/accounts/me`: Información detallada de la cuenta bancaria del usuario (saldo, CVU de 22 dígitos, Alias y estado).
+- `PUT /api/accounts/me/alias`: Actualización del Alias único de la cuenta.
+- `GET /api/accounts/lookup?query={cvuOrAlias}`: Búsqueda y validación de destinatario en tiempo real por CVU o Alias.
+- `POST /api/accounts/deposit`: Acreditación de fondos propios en cuenta.
+- `GET /api/accounts/{id}`: Detalle de una cuenta por ID (Solo Administradores).
+
+### 8.3. Transferencias y Transacciones (`/api/transactions`)
+- `POST /api/transactions/transfer`: Transferencia atómica entre cuentas con verificación de saldo, cuenta activa y generación de asientos dobles (débito y crédito).
+- `GET /api/transactions/me`: Historial paginado de movimientos con filtros por tipo, rango de fechas y montos.
+
+### 8.4. Inversiones a Plazo Fijo (`/api/fixed-deposits`)
+- `POST /api/fixed-deposits/simulate`: Simulador público de rendimiento según capital y días (sin comprometer saldo).
+- `POST /api/fixed-deposits`: Constitución de plazo fijo debitando saldo disponible según TNA (Tasa Nominal Anual) pactada.
+- `GET /api/fixed-deposits/me`: Listado de plazos fijos del usuario (activos, finalizados y cancelados).
+
+### 8.5. Tarjetas Virtuales y Físicas (`/api/cards`)
+- `POST /api/cards/virtual`: Emisión instantánea de tarjeta de débito virtual.
+- `GET /api/cards/me`: Listado de tarjetas activas asociadas a la cuenta (datos enmascarados).
+- `GET /api/cards/{id}/reveal`: Revelación segura de datos sensibles (PAN completo de 16 dígitos y código CVV).
+- `PATCH /api/cards/{id}/freeze`: Congelamiento y descongelamiento temporal de tarjeta.
+- `DELETE /api/cards/{id}`: Baja definitiva de tarjeta.
+
+### 8.6. Administración y Gestión de Usuarios (`/api/users`)
+- `GET /api/users/me`: Consulta de perfil propio.
+- `PUT /api/users/me`: Actualización de perfil propio y cambio de contraseña.
+- `GET /api/users`: Listado paginado de usuarios con saldo de cuenta y roles asignados (Solo Administradores).
+- `GET /api/users/{id}`: Información detallada de un usuario por ID (Solo Administradores).
+- `POST /api/users`: Alta de nuevo usuario con asignación de cuenta, CVU, Alias y saldo inicial (Solo Administradores).
+- `PUT /api/users/{id}`: Modificación de datos personales, correo o rol de un usuario (Solo Administradores).
+- `DELETE /api/users/{id}`: Baja lógica (*Soft Delete*) y bloqueo de usuario (Solo Administradores).
 
 ---
 
-## 8. Reportes de Optimización y Mejoras de UI
+## 9. Colección de Postman
 
-El proyecto incorpora un exhaustivo informe técnico con métricas de rendimiento, paginación a nivel de servidor, análisis deChangeTracker, sistema de diseño en Modo Oscuro, físicas elásticas con GSAP y generación de PDFs:
+El proyecto incluye una colección completa y su entorno de variables en `docs/postman/`:
+- **Colección:** `docs/postman/DigitalArs.postman_collection.json`
+- **Entorno:** `docs/postman/DigitalArs.postman_environment.json`
 
-👉 [docs/reporte-optimizacion.md](docs/reporte-optimizacion.md)
-
----
-
-## 9. Política de Secretos y Seguridad
-
-- **Sin secretos commiteados:** No existen contraseñas de producción, tokens privados de terceros ni claves privadas en el repositorio.
-- **Archivos de plantilla:** Se proporcionan `DigitalArs.Api/appsettings.Example.json` y `.env.example` para guiar la configuración local.
-- **Validación de entradas:** FluentValidation en backend y esquemas de validación en formularios de frontend.
+La colección cuenta con un script de prueba en los endpoints de Login que guarda automáticamente el `token` JWT en el entorno, permitiendo ejecutar cualquier endpoint autenticado sin configuración manual.
 
 ---
 
-## 10. Integrantes del Equipo (Squad-stack)
+## 10. Pruebas Automatizadas
+
+Para ejecutar toda la suite de pruebas unitarias:
+
+```bash
+dotnet test
+```
+
+---
+
+## 11. Equipo de Desarrollo (Squad-stack)
 
 - **Emmanuel Torres**
 - **Andrés**

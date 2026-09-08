@@ -4,6 +4,7 @@ using DigitalArs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalArs.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260908175538_AddAccountCvuAndAlias")]
+    partial class AddAccountCvuAndAlias
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -238,96 +241,6 @@ namespace DigitalArs.Infrastructure.Migrations
                     b.ToTable("FixedTermDeposits", (string)null);
                 });
 
-            modelBuilder.Entity("DigitalArs.Domain.Entities.MoneyReserve", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Color")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<decimal>("CurrentBalance")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
-
-                    b.Property<string>("Icon")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal?>("TargetAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("MoneyReserves", (string)null);
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActionUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications");
-                });
-
             modelBuilder.Entity("DigitalArs.Domain.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -377,231 +290,6 @@ namespace DigitalArs.Infrastructure.Migrations
                             Description = "Usuario estandar de la billetera virtual",
                             Name = "User",
                             NormalizedName = "USER"
-                        });
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.ServicePayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("ReceiptNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ReferenceNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("ReserveId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceProviderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TransactionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("ReserveId");
-
-                    b.HasIndex("ServiceProviderId");
-
-                    b.HasIndex("TransactionId")
-                        .IsUnique();
-
-                    b.ToTable("ServicePayments", (string)null);
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.ServiceProvider", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CodeLabel")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("IconName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceProviders", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Category = 1,
-                            CodeLabel = "Número de Cuenta / Cliente (10 dígitos)",
-                            IconName = "bolt",
-                            IsActive = true,
-                            Name = "Edenor"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Category = 1,
-                            CodeLabel = "Número de Cliente (8 dígitos)",
-                            IconName = "bolt",
-                            IsActive = true,
-                            Name = "Edesur"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Category = 1,
-                            CodeLabel = "Código de Pago Electrónico (14 dígitos)",
-                            IconName = "bolt",
-                            IsActive = true,
-                            Name = "EPEC Córdoba"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Category = 2,
-                            CodeLabel = "Número de Cuenta de Servicios (10 dígitos)",
-                            IconName = "water_drop",
-                            IsActive = true,
-                            Name = "AySA"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Category = 2,
-                            CodeLabel = "Código de Unidad de Facturación (8 dígitos)",
-                            IconName = "water_drop",
-                            IsActive = true,
-                            Name = "Aguas Cordobesas"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Category = 3,
-                            CodeLabel = "Número de Referencia de Pago (11 dígitos)",
-                            IconName = "local_fire_department",
-                            IsActive = true,
-                            Name = "Metrogas"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Category = 3,
-                            CodeLabel = "Número de Cuenta de Factura (10 dígitos)",
-                            IconName = "local_fire_department",
-                            IsActive = true,
-                            Name = "Naturgy"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Category = 3,
-                            CodeLabel = "Código Link / Banelco (12 dígitos)",
-                            IconName = "local_fire_department",
-                            IsActive = true,
-                            Name = "Camuzzi Gas"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Category = 4,
-                            CodeLabel = "Número de Línea (10 dígitos con código de área)",
-                            IconName = "phone_iphone",
-                            IsActive = true,
-                            Name = "Claro"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Category = 4,
-                            CodeLabel = "Número de Línea o Código de Pago (10 dígitos)",
-                            IconName = "phone_iphone",
-                            IsActive = true,
-                            Name = "Personal Flow"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Category = 4,
-                            CodeLabel = "Número de Celular o Cuenta (10 dígitos)",
-                            IconName = "phone_iphone",
-                            IsActive = true,
-                            Name = "Movistar"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Category = 4,
-                            CodeLabel = "Número de Cliente (8 dígitos)",
-                            IconName = "router",
-                            IsActive = true,
-                            Name = "Telecentro"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Category = 5,
-                            CodeLabel = "Número de VEP (Volante Electrónico de Pago)",
-                            IconName = "account_balance",
-                            IsActive = true,
-                            Name = "ARCA / AFIP (VEP)"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Category = 5,
-                            CodeLabel = "Código de Pago Electrónico / Partida",
-                            IconName = "receipt",
-                            IsActive = true,
-                            Name = "AGIP Rentas CABA"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Category = 5,
-                            CodeLabel = "Código de Pago Electrónico (14 dígitos)",
-                            IconName = "receipt",
-                            IsActive = true,
-                            Name = "ARBA Buenos Aires"
                         });
                 });
 
@@ -1208,62 +896,6 @@ namespace DigitalArs.Infrastructure.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("DigitalArs.Domain.Entities.MoneyReserve", b =>
-                {
-                    b.HasOne("DigitalArs.Domain.Entities.Account", "Account")
-                        .WithMany("Reserves")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("DigitalArs.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.ServicePayment", b =>
-                {
-                    b.HasOne("DigitalArs.Domain.Entities.Account", "Account")
-                        .WithMany("ServicePayments")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DigitalArs.Domain.Entities.MoneyReserve", "Reserve")
-                        .WithMany("ServicePayments")
-                        .HasForeignKey("ReserveId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("DigitalArs.Domain.Entities.ServiceProvider", "ServiceProvider")
-                        .WithMany("Payments")
-                        .HasForeignKey("ServiceProviderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DigitalArs.Domain.Entities.Transaction", "Transaction")
-                        .WithOne()
-                        .HasForeignKey("DigitalArs.Domain.Entities.ServicePayment", "TransactionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("Reserve");
-
-                    b.Navigation("ServiceProvider");
-
-                    b.Navigation("Transaction");
-                });
-
             modelBuilder.Entity("DigitalArs.Domain.Entities.Transaction", b =>
                 {
                     b.HasOne("DigitalArs.Domain.Entities.Account", "Account")
@@ -1350,26 +982,12 @@ namespace DigitalArs.Infrastructure.Migrations
 
                     b.Navigation("FixedTermDeposits");
 
-                    b.Navigation("Reserves");
-
-                    b.Navigation("ServicePayments");
-
                     b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.MoneyReserve", b =>
-                {
-                    b.Navigation("ServicePayments");
                 });
 
             modelBuilder.Entity("DigitalArs.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("DigitalArs.Domain.Entities.ServiceProvider", b =>
-                {
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("DigitalArs.Domain.Entities.User", b =>
