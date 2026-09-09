@@ -1,4 +1,4 @@
-﻿using DigitalArs.Application.DTOs.Common;
+using DigitalArs.Application.DTOs.Common;
 using DigitalArs.Application.DTOs.Users;
 using DigitalArs.Application.Exceptions;
 using DigitalArs.Application.Interfaces;
@@ -153,20 +153,32 @@ public class UserService : IUserService
                 throw new InvalidOperationException($"Error al asignar el rol: {errors}");
             }
 
-            // Generar CVU único de 22 dígitos
-            var randomDigits = Random.Shared.Next(100000000, 999999999);
-            var generatedCvu = $"0000003100010{randomDigits}";
-
-            // Generar Alias base (ej. roberto.carlos.ars)
-            var cleanFirst = request.FirstName.Trim().ToLowerInvariant().Replace(" ", "");
-            var cleanLast = request.LastName.Trim().ToLowerInvariant().Replace(" ", "");
-            var initialAlias = $"{cleanFirst}.{cleanLast}.ars";
-            
-            var aliasConflict = await _unitOfWork.Repository<Account>().Query()
-                .AnyAsync(a => a.Alias == initialAlias, cancellationToken);
-            if (aliasConflict)
+            // Generar CVU único de 22 dígitos verificando que no exista colisión (incluso en cuentas inactivas)
+            string generatedCvu;
+            do
             {
-                initialAlias = $"{cleanFirst}.{cleanLast}.{Random.Shared.Next(100, 999)}.ars";
+                var randomDigits = Random.Shared.Next(100000000, 999999999);
+                generatedCvu = $"0000003100010{randomDigits}";
+            }
+            while (await _unitOfWork.Repository<Account>().Query()
+                .IgnoreQueryFilters()
+                .AnyAsync(a => a.Cvu == generatedCvu, cancellationToken));
+
+            // Generar Alias base único (ej. roberto.carlos.ars)
+            // Permitir múltiples usuarios con el mismo nombre y apellido sin colisión
+            var cleanFirst = RemoveDiacritics(request.FirstName.Trim().ToLowerInvariant()).Replace(" ", "");
+            var cleanLast = RemoveDiacritics(request.LastName.Trim().ToLowerInvariant()).Replace(" ", "");
+            if (string.IsNullOrWhiteSpace(cleanFirst)) cleanFirst = "usuario";
+            if (string.IsNullOrWhiteSpace(cleanLast)) cleanLast = "ars";
+
+            var baseAlias = $"{cleanFirst}.{cleanLast}";
+            var initialAlias = $"{baseAlias}.ars";
+
+            while (await _unitOfWork.Repository<Account>().Query()
+                .IgnoreQueryFilters()
+                .AnyAsync(a => a.Alias == initialAlias, cancellationToken))
+            {
+                initialAlias = $"{baseAlias}.{Random.Shared.Next(100, 99999)}.ars";
             }
 
             var account = new Account
@@ -347,5 +359,22 @@ public class UserService : IUserService
         }
 
         return _mapper.Map<UserResponse>(user);
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+        var stringBuilder = new System.Text.StringBuilder(normalizedString.Length);
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark && char.IsLetterOrDigit(c))
+            {
+                stringBuilder.Append(c);
+            }
+        }
+
+        return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
     }
 }
