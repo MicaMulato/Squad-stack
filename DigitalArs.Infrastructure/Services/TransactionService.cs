@@ -1,4 +1,4 @@
-using DigitalArs.Application.DTOs;
+﻿using DigitalArs.Application.DTOs;
 using DigitalArs.Application.Interfaces;
 using DigitalArs.Domain.Entities;
 using DigitalArs.Domain.Enums;
@@ -213,7 +213,17 @@ public class TransactionService : ITransactionService
         if (!string.IsNullOrWhiteSpace(queryDto.Search))
         {
             var s = queryDto.Search.Trim();
-            query = query.Where(t => t.Concept != null && EF.Functions.Like(t.Concept, $"%{s}%"));
+            var lowerS = s.ToLowerInvariant();
+            var isInvestment = lowerS.Contains("invers") || lowerS.Contains("plazo fijo") || lowerS.Contains("rendimiento");
+            var isService = lowerS.Contains("servicio") || lowerS.Contains("pago");
+            var isDeposit = lowerS.Contains("deposito") || lowerS.Contains("depósito");
+
+            query = query.Where(t =>
+                (t.Concept != null && EF.Functions.Like(t.Concept, $"%{s}%"))
+                || (isInvestment && t.Type == TransactionType.FixedDeposit)
+                || (isService && t.Type == TransactionType.Payment)
+                || (isDeposit && t.Type == TransactionType.Deposit)
+            );
         }
 
         if (queryDto.DateFrom.HasValue)

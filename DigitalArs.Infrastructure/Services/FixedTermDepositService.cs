@@ -83,7 +83,7 @@ public class FixedTermDepositService : IFixedTermDepositService
             AccountId = account.Id,
             Amount = request.Amount,
             Type = TransactionType.FixedDeposit,
-            Concept = $"Constitución de Plazo Fijo ({request.DurationDays} días @ {interestRate}% TNA)",
+            Concept = $"Inversión: Plazo Fijo ({request.DurationDays} días @ {interestRate}% TNA)",
             Date = now
         };
 
